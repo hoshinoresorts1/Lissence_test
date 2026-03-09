@@ -13,7 +13,7 @@ struct MusicDetailView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                //상단 컨트롤 바
+                // MARK: - 상단 컨트롤 바
                 HStack {
                     Button(action: { currentPath = "home" }) {
                         Image(systemName: "house.fill")
@@ -34,7 +34,7 @@ struct MusicDetailView: View {
                     
                     Spacer()
                 
-                //중앙 핵심 콘텐츠
+                // MARK: - 중앙 핵심 콘텐츠
                 VStack(spacing: 25) {
                     Image(systemName: "music.quarternote.3")
                         .font(.system(size: 90))
@@ -48,7 +48,7 @@ struct MusicDetailView: View {
                 
                 Spacer()
 
-                //모드 전환 버튼
+                // MARK: - 모드 전환 버튼
                 Button(action: { currentPath = "detection" }) {
                     Label("감지 모드 전환", systemImage: "waveform")
                         .font(.headline)

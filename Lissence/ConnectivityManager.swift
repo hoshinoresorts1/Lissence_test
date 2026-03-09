@@ -1,8 +1,71 @@
-//
-//  ConnectivityManager.swift
-//  Lissence
-//
-//  Created by Hoshino on 2026/03/09.
-//
+/// 아이폰과 워치 사이를 연결하는 무전기
 
 import Foundation
+import WatchConnectivity
+import Combine
+
+// 1. 주고받을 데이터의 '규격' (UIKit의 Model 구조체와 같습니다)
+struct MessageData: Codable {
+    let title: String      // 알림 메시지 내용
+    let iconName: String   // 표시할 아이콘 이름
+    let isDanger: Bool     // 위험 여부 (색상 결정용)
+}
+
+// 2. 통신 매니저 (UIKit의 ViewModel 또는 Manager 객체 역할)
+// ObservableObject: "내 내부 데이터가 바뀌면 화면(View)한테 바로 알려줄게!"라는 뜻입니다.
+final class ConnectivityManager: NSObject, ObservableObject {
+    
+    static let shared = ConnectivityManager() // 어디서든 접근 가능한 싱글톤
+    
+    // @Published: UIKit에서 'didSet { label.text = newValue }' 하던 걸 자동으로 해줍니다.
+    // 이 값이 바뀌면 이 변수를 쓰는 모든 SwiftUI 화면이 알아서 새로고침됩니다.
+    @Published var receivedMessage: MessageData?
+    
+    override private init() {
+        super.init()
+        // 세션(무전기 채널)이 지원되는 기기인지 확인하고 활성화합니다.
+        if WCSession.isSupported() {
+            WCSession.default.delegate = self
+            WCSession.default.activate()
+        }
+    }
+    
+    // 데이터를 상대 기기로 쏘는 함수
+    func send(message: MessageData) {
+        // 상대방 기기(워치)가 연결되어 있는지 먼저 확인
+        guard WCSession.default.isReachable else {
+            print("연결 실패")
+            return
+        }
+        
+        // 구조체 데이터를 딕셔너리[String: Any] 형태로 변환해서 보냅니다. (전송 규격)
+        if let data = try? JSONEncoder().encode(message),
+           let dictionary = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+            WCSession.default.sendMessage(dictionary, replyHandler: nil)
+        }
+    }
+}
+
+// 3. 무전기 신호를 수신하는 곳 (Delegate 패턴 - UIKit과 동일합니다)
+extension ConnectivityManager: WCSessionDelegate {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+
+    // ★ 실제로 상대방이 sendMessage를 했을 때 실행되는 콜백 함수
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        // UI 업데이트는 반드시 메인 스레드에서! (UIKit의 DispatchQueue.main.async와 동일)
+        DispatchQueue.main.async {
+            // 받은 딕셔너리를 다시 우리 모델(MessageData)로 조립합니다.
+            if let data = try? JSONSerialization.data(withJSONObject: message, options: []),
+               let decoded = try? JSONDecoder().decode(MessageData.self, from: data) {
+                self.receivedMessage = decoded // 여기서 @Published 값이 바뀌며 화면이 바뀝니다.
+            }
+        }
+    }
+    
+    #if os(iOS) // 아이폰 전용 필수 델리게이트 메서드들
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+    func sessionDidDeactivate(_ session: WCSession) {
+        WCSession.default.activate() // 세션이 끊기면 다시 살려내기
+    }
+    #endif
+}

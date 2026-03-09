@@ -8,7 +8,7 @@ struct SubtitleWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            // 1. 헤더 (X 버튼)
+            // MARK: - 1. 헤더 (X 버튼)
             HStack {
                 Text("실시간 자막")
                     .font(.caption).bold().foregroundColor(.yellow)
@@ -20,7 +20,7 @@ struct SubtitleWidgetView: View {
             }
             .padding([.top, .horizontal], 20)
 
-            // 자막 내용 (위로 올리면 자동으로 전체 화면처럼 보임)
+            // MARK: - 자막 내용 (위로 올리면 자동으로 전체 화면처럼 보임)
             ScrollView {
                 Text(text)
                     .font(.system(size: 24, weight: .bold))

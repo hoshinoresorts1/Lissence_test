@@ -10,10 +10,14 @@ import SwiftUI
 struct DetectionDetailView: View {
     @Binding var currentPath: String
     @State private var isVoiceOn = false
+    
+    // ConnectivityManager 연결
+        @StateObject var connectivity = ConnectivityManager.shared
 
+    // MARK: - 바디
     var body: some View {
         VStack(spacing: 0) {
-            // 상단바 (홈버튼 & 토글)
+            // MARK: - 상단바 (홈버튼 & 토글)
             HStack {
                 Button(action: { currentPath = "home" }) {
                     Image(systemName: "house.fill").font(.title2).foregroundColor(.gray)
@@ -46,7 +50,7 @@ struct DetectionDetailView: View {
             
             Spacer()
 
-            // 하단 전환 버튼
+            // MARK: - 하단 전환 버튼
             Button(action: { currentPath = "music" }) {
                 Label("음악모드 전환", systemImage: "music.quarternote.3")
                     .font(.headline)
@@ -60,7 +64,14 @@ struct DetectionDetailView: View {
             .padding(.bottom, 30)
         }
         
-        // 자막창
+        // 예시: 버튼을 눌러 워치로 전송
+        Button("워치로 위험 신호 보내기") {
+            let msg = MessageData(title: "위험 감지됨!", iconName: "exclamationmark.triangle", isDanger: true)
+            connectivity.send(message: msg)
+        }
+        
+        
+        // MARK: - 자막창
         .sheet(isPresented: $isVoiceOn) {
             SubtitleWidgetView(isShowing: $isVoiceOn, text: "실시간 대화 내용입니다...")
                 .interactiveDismissDisabled() // 맘대로 끌어내려 닫기 방지
