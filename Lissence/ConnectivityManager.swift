@@ -13,14 +13,19 @@ struct MessageData: Codable {
 
 // 2. 통신 매니저 (UIKit의 ViewModel 또는 Manager 객체 역할)
 // ObservableObject: "내 내부 데이터가 바뀌면 화면(View)한테 바로 알려줄게!"라는 뜻입니다.
+/// 아이폰과 애플워치 간의 데이터를 송수신하는 통신 매니저
 final class ConnectivityManager: NSObject, ObservableObject {
     
+    // MARK: - Singleton
     static let shared = ConnectivityManager() // 어디서든 접근 가능한 싱글톤
     
     // @Published: UIKit에서 'didSet { label.text = newValue }' 하던 걸 자동으로 해줍니다.
     // 이 값이 바뀌면 이 변수를 쓰는 모든 SwiftUI 화면이 알아서 새로고침됩니다.
+    // MARK: - Published Properties
+    /// 워치로부터 전달받은 최신 메시지 (뷰에서 관찰 대상)
     @Published var receivedMessage: MessageData?
     
+    // MARK: - Initialization
     override private init() {
         super.init()
         // 세션(무전기 채널)이 지원되는 기기인지 확인하고 활성화합니다.
@@ -30,7 +35,8 @@ final class ConnectivityManager: NSObject, ObservableObject {
         }
     }
     
-    // 데이터를 상대 기기로 쏘는 함수
+    // MARK: - Sending Logic
+    /// 상대 기기로 데이터를 전송합니다.
     func send(message: MessageData) {
         // 상대방 기기(워치)가 연결되어 있는지 먼저 확인
         guard WCSession.default.isReachable else {
@@ -46,6 +52,7 @@ final class ConnectivityManager: NSObject, ObservableObject {
     }
 }
 
+// MARK: - WCSessionDelegate
 // 3. 무전기 신호를 수신하는 곳 (Delegate 패턴 - UIKit과 동일합니다)
 extension ConnectivityManager: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
@@ -54,7 +61,7 @@ extension ConnectivityManager: WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         // UI 업데이트는 반드시 메인 스레드에서! (UIKit의 DispatchQueue.main.async와 동일)
         DispatchQueue.main.async {
-            // 받은 딕셔너리를 다시 우리 모델(MessageData)로 조립합니다.
+            // 수신 데이터 디코딩 및 UI 업데이트
             if let data = try? JSONSerialization.data(withJSONObject: message, options: []),
                let decoded = try? JSONDecoder().decode(MessageData.self, from: data) {
                 self.receivedMessage = decoded // 여기서 @Published 값이 바뀌며 화면이 바뀝니다.
