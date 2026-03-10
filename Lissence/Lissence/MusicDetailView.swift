@@ -1,9 +1,7 @@
-//
-//  MusicDetailView.swift
-//  Lissence
-//
-//  Created by 서유정 on 3/3/26.
-//
+/// 음악 모드입니다.
+/// - 기능
+///     - 음악 시각화
+///     - 햅틱 출력
 
 import SwiftUI
 

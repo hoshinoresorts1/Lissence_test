@@ -1,3 +1,8 @@
+/// 감지 모드입니다.
+/// - 기능
+///     - 위험 소리 분류 및 출력
+///     - 사람의 말소리 실시간 출력
+
 import SwiftUI
 
 struct SubtitleWidgetView: View {

@@ -23,7 +23,7 @@ struct MainHomeView: View {
             // MARK: - 중앙 버튼
             VStack(spacing: 25) {
                 Button(action: { currentPath = "detection" }) {
-                    ModeSelectionCard(title: "감지 모드", icon: "waveform.and.mic", color: .blue, description: "주변 소리 및 음성 인식")
+                    ModeSelectionCard(title: "감지 모드", icon: "waveform.and.mic", color: .blue, description: "주변 소리 위험 감지 및 음성 인식")
                 }
 
                 Button(action: { currentPath = "music" }) {
