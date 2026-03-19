@@ -20,7 +20,7 @@ struct WatchContentView: View {
                         .foregroundColor(.purple)
                 }
             }
-            .navigationTitle("Lissence")
+            .navigationTitle("LISSENCE")
         }
     }
 }

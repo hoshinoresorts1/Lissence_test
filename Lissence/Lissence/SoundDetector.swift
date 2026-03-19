@@ -57,74 +57,33 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         isDetecting = false
     }
 
-    // ★ 소리가 분석될 때마다 실행되는 함수
+    /// 소리 분석 처리 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
-        guard let classificationResult = result as? SNClassificationResult,
-              let bestClassification = classificationResult.classifications.first else { return }
+        guard let result = result as? SNClassificationResult else { return }
         
-        // 임계값을 0.5로 낮추어 더 민감하게 반응하게 함
-        if bestClassification.confidence > 0.5 {
-            let soundLabel = bestClassification.identifier
-            print("감지된 소리: \(soundLabel), 신뢰도: \(bestClassification.confidence)") // 디버깅용 출력
+        // 1. 신뢰도 순 정렬 및 임계값 체크
+        let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
+        
+        for classification in sorted {
+            guard classification.confidence > 0.6 else { break }
             
-            DispatchQueue.main.async {
-                self.processResult(label: soundLabel)
+        // 2. [핵심] 공통 모델에서 소리 타입을 가져옴
+            if let sound = DangerSound.from(identifier: classification.identifier) {
+                // 3. 개별 인자를 넘기지 않고 sound 객체 하나만 넘김
+                DispatchQueue.main.async {
+                    self.lastDetectedSound = sound.label
+                    self.sendDangerAlert(sound: sound)
+                }
+                return
             }
         }
     }
-    // 소리 로직
-    /// 소리 분류 로직 리스트
-    /// - Parameter label: 분류할 레이블 종류
-    private func processResult(label: String) {
-        switch label {
-        // 1. 긴급 위험 (분리 적용)
-        case "siren", "emergency_vehicle":
-            sendDangerAlert(title: "🚨 긴급 사이렌 감지!", icon: "bell.badge.fill", isDanger: true)
-            
-        case "fire_alarm", "smoke_detector":
-            sendDangerAlert(title: "🔥 화재 알림 감지!", icon: "flame.fill", isDanger: true)
 
-        // 2. 위험 소음
-        case "shouting", "screaming", "yelling":
-            sendDangerAlert(title: "🗣️ 큰 소음/비명 감지!", icon: "exclamationmark.bubble.fill", isDanger: true)
-
-        // 3. 생활 위험
-        case "car_horn", "vehicle_horn":
-            sendDangerAlert(title: "🚘 차 경적 확인!", icon: "car.fill", isDanger: true)
-            
-        case "knock":
-            sendDangerAlert(title: "🚪 노크 소리 감지!", icon: "door.left.hand.closed", isDanger: false)
-
-        // 4. 경고 소리
-        case "dog_barking", "bark":
-            sendDangerAlert(title: "🐕 개 짖는 소리 감지!", icon: "pawprint.fill", isDanger: false)
-
-        // 5. 돌발 상황
-        case "glass_shattering", "explosion":
-            sendDangerAlert(title: "⚠️ 유리 파손/폭발음 주의!", icon: "shatter", isDanger: true)
-
-        case "gunshot", "gunfire":
-            sendDangerAlert(title: "⚠️ 총성/폭발음 감지!", icon: "bolt.shield.fill", isDanger: true)
-            
-        // 6. 일상 음성
-        case "speech", "conversation":
-            sendDangerAlert(title: "💬 사람의 말소리 감지", icon: "person.wave.2.fill", isDanger: false)
-            
-            
-            
-        default:
-            break
-        }
-    }
-
-    private func sendDangerAlert(title: String, icon: String, isDanger: Bool) {
-        self.lastDetectedSound = title
-        
-        // 워치로 데이터 전송 (ConnectivityManager 사용)
-        let msg = MessageData(title: title, iconName: icon, isDanger: isDanger)
-        ConnectivityManager.shared.send(message: msg)
-        
-        print("위험 감지 및 전송: \(title)")
+    private func sendDangerAlert(sound: DangerSound) {
+        let message = MessageData(
+            title: sound.label, iconName: sound.icon, isDanger: sound.isDanger
+        )
+        ConnectivityManager.shared.send(message: message)
     }
 }
 

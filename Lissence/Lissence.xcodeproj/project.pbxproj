@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C306EAB62F6C0F3200AFE6F5 /* DangerSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */; };
+		C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */; };
 		C3B57C5C2F5EDD12002C9D36 /* Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
 		C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
@@ -38,6 +40,7 @@
 
 /* Begin PBXFileReference section */
 		49130A712F44376B00B10708 /* Lissence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lissence.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DangerSound.swift; sourceTree = "<group>"; };
 		C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +92,7 @@
 		49130A682F44376B00B10708 = {
 			isa = PBXGroup;
 			children = (
+				C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */,
 				C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */,
 				49130A732F44376B00B10708 /* Lissence */,
 				C3B57C532F5EDD10002C9D36 /* Watch Watch App */,
@@ -215,6 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
+				C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,6 +228,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
+				C306EAB62F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

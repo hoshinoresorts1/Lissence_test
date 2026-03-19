@@ -101,9 +101,8 @@ extension DetectionDetailView {
     private var contentView: some View {
         VStack(spacing: 30) {
             if soundDetector.lastDetectedSound.isEmpty {
-                // [수정] 감지 중일 때: 위치와 같은 ProgressView 적용
-                VStack(spacing: 25) {
-                    // ProgressView 크게(아이폰)
+                // 1. 소리가 감지되지 않았을 때 (대기 화면)
+                VStack(spacing: 20) {
                     ProgressView()
                         .scaleEffect(2.0)
                         .progressViewStyle(CircularProgressViewStyle(tint: .blue))
@@ -114,15 +113,17 @@ extension DetectionDetailView {
                 }
                 .transition(.opacity)
             } else {
-                // 소리 감지 시: 결과 출력
+                // 2. 소리가 감지되었을 때 보여줄 화면
+                // String인 label을 가지고 역으로 Enum 케이스를 찾음
+                let currentSound = DangerSound.allCases.first { $0.label == soundDetector.lastDetectedSound} ?? .unknown
                 VStack(spacing: 20) {
-                    Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
+                    Image(systemName: currentSound.icon)
                         .font(.system(size: 100))
-                        .foregroundColor(.red)
+                        .foregroundColor(currentSound.isDanger ? .red : .blue)
                     
                     Text(soundDetector.lastDetectedSound)
                         .font(.system(size: 30, weight: .bold))
-                        .foregroundColor(.red)
+                        .foregroundColor(currentSound.isDanger ? .red : .primary)
                 }
                 .transition(.scale.combined(with: .opacity))
             }
@@ -147,19 +148,6 @@ extension DetectionDetailView {
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 30)
-        }
-    }
-    
-    // 감지된 텍스트에 따라 알맞은 아이콘을 반환하는 헬퍼 함수
-    private func getIconForSound(_ sound: String) -> String {
-        if sound.contains("경적") {
-            return "car.fill"
-        } else if sound.contains("위험 신호") {
-            return "bell.and.waves.left.and.right.fill"
-        } else if sound.contains("큰 소음") || sound.contains("외침") {
-            return "exclamationmark.bubble.fill"
-        } else {
-            return "exclamationmark.triangle.fill"
         }
     }
 }
