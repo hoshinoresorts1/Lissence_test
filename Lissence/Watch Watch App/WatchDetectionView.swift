@@ -3,37 +3,68 @@
 import SwiftUI
 
 struct WatchDetectionView: View {
+    
+    /// 기존 : 아이폰 연동 매니저
     @StateObject var connectivity = ConnectivityManager.shared
+    /// 추가 : 워치 단독 감지 엔진
+    @StateObject private var classifier = SoundClassifier()
 
     var body: some View {
         VStack {
-//            Text("감지 모드")
-//                .font(.headline)
-//            Spacer()
-            // 추후 여기에 소리 감지 결과나 텍스트가 표시됩니다.
-            // if let 문법을 사용하여 데이터가 있을 때만 아이콘과 글자를 그립니다. (조건부 렌더링)
+            // 상황 판별 (아이폰 감지 내용 우선 표시 / 없으면 워치 자체 감지 결과 표시)
             if let message = connectivity.receivedMessage {
-                Image(systemName: message.iconName) // 아이콘 그리기
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(message.isDanger ? .red : .green) // 위험하면 빨간색
-                
-                Text(message.title) // 글자 그리기
-                    .font(.system(size: 15, weight: .bold))
-                    // .onChange: 데이터가 바뀌는 순간을 감지합니다.
-                    .onChange(of: connectivity.receivedMessage?.title) {
-                        // ★ 여기가 핵심! 데이터 수신 시 워치 손목에 진동을 울립니다.
-                        WKInterfaceDevice.current().play(.notification)
-                    }
-            } else {
-                // 데이터가 없을 때 보여줄 기본 화면 (UIKit의 Placeholder 역할)
-                ProgressView()
-                Text("소리 대기 중...")
-                    .font(.footnote)
-                    .padding(.top, 5)
+                displayInfo(title: message.title, icon: message.iconName, isDanger: message.isDanger, source: "iPhone")
             }
+            else if classifier.detectedSound != .unknown {
+                // 워치 자체 감지 결과 표시
+                displayInfo(title: classifier.detectedSound.label, icon: classifier.detectedSound.icon, isDanger: true, source: "Watch")
+           } else {
+               // 데이터가 없을 때 보여줄 기본 화면
+               ProgressView()
+               Text("소리 대기 중...")
+                   .font(.footnote)
+                   .padding(.top, 5)
+           }
         }
         .navigationTitle("감지 모드")
+            .onAppear() {
+                classifier.start() // 화면 진입 시 워치 마이크 감지 시작
+                setupHapticCallBack()
+        }
+            .onDisappear {
+                classifier.stop() // 화면 나가면 중지
+            }
+        }
+    
+    // 공통 UI 컴포넌트
+    @ViewBuilder
+    /// 아이폰에서 수신된 데이터 표시 (자막이나 상세 정보)
+    /// - Parameters:
+    ///   - title: 위험이름
+    ///   - icon: 위험 종류별 아이콘
+    ///   - isDanger: 위험한지 여부
+    ///   - source: 아이폰 또는 워치
+    /// - Returns: 뷰로 반환
+    func displayInfo(title: String, icon: String, isDanger: Bool, source: String) -> some View {
+        Image(systemName: icon)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 50, height: 50)
+            .foregroundColor(isDanger ? .red : .green)
+        
+        Text(title)
+            .font(.headline)
+        
+        Text("\(source)에서 감지됨!")
+            .font(.caption2)
+            .foregroundColor(.gray)
+    }
+
+    /// 워치 자체 감지시 진동 실행
+    private func setupHapticCallBack() {
+        classifier.onDangerDetected = { sound, confidence in
+            HapticController.shared.play(for: sound)
+        }
     }
 }
+
