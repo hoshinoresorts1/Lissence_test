@@ -8,6 +8,8 @@ import SwiftUI
 struct DetectionDetailView: View {
     @Binding var currentPath: String
     @State private var isVoiceOn = false
+    /// 애니메이션용
+    @State private var rotationAngle: Double = 0
     
     // 매니저 연결 (이전에 테스트했던 클래스들을 가져옵니다)
     @StateObject var connectivity = ConnectivityManager.shared
@@ -88,34 +90,65 @@ extension DetectionDetailView {
     
     // Content: 소리 분석 상태 표시
     private var contentView: some View {
-        VStack(spacing: 25) {
-            // 감지된 소리가 없을 때 (기본 화면)
-            if soundDetector.lastDetectedSound.isEmpty {
-                Image(systemName: "waveform")
-                    .font(.system(size: 90))
-                    .foregroundColor(.blue)
-                
-                Text("소리 분석 중..")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-            } else {
-                // 위험 소리가 감지되었을 때
-                Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
-                    .font(.system(size: 90))
-                    .foregroundColor(.red)
-                
-                Text(soundDetector.lastDetectedSound)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-        }
+//        VStack(spacing: 25) {
+//            // 감지된 소리가 없을 때 (기본 화면)
+//            if soundDetector.lastDetectedSound.isEmpty {
+//                Image(systemName: "waveform")
+//                    .font(.system(size: 90))
+//                    .foregroundColor(.blue)
+//                
+//                Text("소리 분석 중..")
+//                    .font(.title3)
+//                    .fontWeight(.medium)
+//                    .foregroundColor(.secondary)
+//            } else {
+//                // 위험 소리가 감지되었을 때
+//                Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
+//                    .font(.system(size: 90))
+//                    .foregroundColor(.red)
+//                
+//                Text(soundDetector.lastDetectedSound)
+//                    .font(.title)
+//                    .fontWeight(.bold)
+//                    .foregroundColor(.red)
+//                    .multilineTextAlignment(.center)
+//                    .padding(.horizontal)
+//            }
+//        }
+        VStack(spacing: 30) {
+                    if soundDetector.lastDetectedSound.isEmpty {
+                        // 감지 중일 때: 돌아가는 아이콘
+                        VStack(spacing: 20) {
+                            Image(systemName: "waveform.and.mic")
+                                .font(.system(size: 80))
+                                .foregroundColor(.blue)
+                                .rotationEffect(.degrees(rotationAngle))
+                                .onAppear {
+                                    withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+                                        rotationAngle = 360
+                                    }
+                                }
+                            Text("주변 소리 분석 중...")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        // 소리 감지 시: 결과 출력
+                        VStack(spacing: 20) {
+                            Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
+                                .font(.system(size: 100))
+                                .foregroundColor(.red)
+                            
+                            Text(soundDetector.lastDetectedSound)
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundColor(.red)
+                        }
+                        .transition(.scale) // 나타날 때 효과
+                    }
+                }
     }
     
-    // Bottom Controls: 모드 전환 버튼 및 워치 전송 테스트
+    // Bottom Controls: 모드 전환 버튼
     private var bottomControls: some View {
         VStack(spacing: 15) {
             
