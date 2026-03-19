@@ -1,7 +1,7 @@
 import Foundation
 
 enum DangerSound: String, CaseIterable {
-    case siren, fireAlarm, shouting, carHorn, knock, laughter, speech, unknown
+    case siren, fireAlarm, shouting, carHorn, knock, laughter, babyCrying, speech, unknown
 
     // 1. 표시용 텍스트 (라벨)
     var label: String {
@@ -12,6 +12,7 @@ enum DangerSound: String, CaseIterable {
         case .carHorn: return "🚘 차 경적 감지!"
         case .knock: return "🚪 노크 소리가 들려요!"
         case .laughter: return "😊 웃음소리가 들려요!"
+        case .babyCrying: return "👶 아기 울음소리 감지!"
         case .speech: return "💬 사람의 말소리가 들려요~"
         case .unknown: return ""
         }
@@ -26,6 +27,7 @@ enum DangerSound: String, CaseIterable {
         case .carHorn: return "car.fill"
         case .knock: return "door.left.hand.closed"
         case .laughter: return "face.smiling.fill"
+        case .babyCrying: return "figure.and.child.holdinghands"
         case .speech: return "person.wave.2.fill"
         case .unknown: return "questionmark.circle"
         }
@@ -48,6 +50,7 @@ enum DangerSound: String, CaseIterable {
         case "car_horn", "vehicle_horn": return .carHorn
         case "knock": return .knock
         case "laughter", "giggle", "chuckle": return .laughter
+        case "baby_crying": return .babyCrying
         case "speech", "conversation": return .speech
         default: return nil
         }
