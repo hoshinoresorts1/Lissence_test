@@ -8,8 +8,9 @@ import SwiftUI
 struct DetectionDetailView: View {
     @Binding var currentPath: String
     @State private var isVoiceOn = false
-    /// 애니메이션용
-    @State private var rotationAngle: Double = 0
+    
+    // [추가] 감지 결과 표시 후 대기 상태로 돌아가기 위한 타이머
+    @State private var resetTimer: Timer?
     
     // 매니저 연결 (이전에 테스트했던 클래스들을 가져옵니다)
     @StateObject var connectivity = ConnectivityManager.shared
@@ -20,14 +21,10 @@ struct DetectionDetailView: View {
         VStack(spacing: 0) {
             // MARK: - 1. 헤더 영역 (상단 네비게이션 및 설정)
             headerView
-            
             Spacer()
-            
             // MARK: - 2. 컨텐츠 영역 (메인 로직 및 정보 표시)
             contentView
-            
             Spacer()
-            
             // MARK: - 3. 하단 컨트롤 영역 (버튼 및 인터랙션)
             bottomControls
         }
@@ -37,11 +34,10 @@ struct DetectionDetailView: View {
         }
         .onDisappear {
             soundDetector.stopDetection()
+            // 화면 나갈때 타이머 취소
+            resetTimer?.invalidate()
             // 화면을 벗어나면 음성인식도 확실히 끄기
-            if isVoiceOn {
-                speechManager.stopRecording()
-                isVoiceOn = false
-            }
+            if isVoiceOn { speechManager.stopRecording(); isVoiceOn = false }
         }
         // 토글 버튼이 눌릴 때마다 음성 인식 켜고 끄기
         .onChange(of: isVoiceOn) { newValue in
@@ -51,6 +47,19 @@ struct DetectionDetailView: View {
                 speechManager.stopRecording()
             }
         }
+        // [추가] 소리가 감지되었을 때 자동으로 대기 상태로 돌아가는 로직
+        .onChange(of: soundDetector.lastDetectedSound) { newValue in
+            if !newValue.isEmpty {
+                // 새로운 소리가 감지되면 기존 타이머 리셋
+                resetTimer?.invalidate()
+                
+                // 4초 후 lastDetectedSound를 빈 문자열로 만들어 대기 화면으로 되돌림
+                resetTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
+                    soundDetector.lastDetectedSound = ""
+                }
+            }
+        }
+        
         // 자막창 (Sheet)
         .sheet(isPresented: $isVoiceOn) {
             // 더미 텍스트 대신 speechManager의 실제 텍스트를 전달합니다.
@@ -90,62 +99,36 @@ extension DetectionDetailView {
     
     // Content: 소리 분석 상태 표시
     private var contentView: some View {
-//        VStack(spacing: 25) {
-//            // 감지된 소리가 없을 때 (기본 화면)
-//            if soundDetector.lastDetectedSound.isEmpty {
-//                Image(systemName: "waveform")
-//                    .font(.system(size: 90))
-//                    .foregroundColor(.blue)
-//                
-//                Text("소리 분석 중..")
-//                    .font(.title3)
-//                    .fontWeight(.medium)
-//                    .foregroundColor(.secondary)
-//            } else {
-//                // 위험 소리가 감지되었을 때
-//                Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
-//                    .font(.system(size: 90))
-//                    .foregroundColor(.red)
-//                
-//                Text(soundDetector.lastDetectedSound)
-//                    .font(.title)
-//                    .fontWeight(.bold)
-//                    .foregroundColor(.red)
-//                    .multilineTextAlignment(.center)
-//                    .padding(.horizontal)
-//            }
-//        }
         VStack(spacing: 30) {
-                    if soundDetector.lastDetectedSound.isEmpty {
-                        // 감지 중일 때: 돌아가는 아이콘
-                        VStack(spacing: 20) {
-                            Image(systemName: "waveform.and.mic")
-                                .font(.system(size: 80))
-                                .foregroundColor(.blue)
-                                .rotationEffect(.degrees(rotationAngle))
-                                .onAppear {
-                                    withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-                                        rotationAngle = 360
-                                    }
-                                }
-                            Text("주변 소리 분석 중...")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        // 소리 감지 시: 결과 출력
-                        VStack(spacing: 20) {
-                            Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
-                                .font(.system(size: 100))
-                                .foregroundColor(.red)
-                            
-                            Text(soundDetector.lastDetectedSound)
-                                .font(.system(size: 30, weight: .bold))
-                                .foregroundColor(.red)
-                        }
-                        .transition(.scale) // 나타날 때 효과
-                    }
+            if soundDetector.lastDetectedSound.isEmpty {
+                // [수정] 감지 중일 때: 위치와 같은 ProgressView 적용
+                VStack(spacing: 25) {
+                    // ProgressView 크게(아이폰)
+                    ProgressView()
+                        .scaleEffect(2.0)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                    Text("주변 소리 분석 중...")
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
                 }
+                .transition(.opacity)
+            } else {
+                // 소리 감지 시: 결과 출력
+                VStack(spacing: 20) {
+                    Image(systemName: getIconForSound(soundDetector.lastDetectedSound))
+                        .font(.system(size: 100))
+                        .foregroundColor(.red)
+                    
+                    Text(soundDetector.lastDetectedSound)
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundColor(.red)
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        // 애니메이션 통합 적용
+        .animation(.easeInOut, value: soundDetector.lastDetectedSound)
     }
     
     // Bottom Controls: 모드 전환 버튼
