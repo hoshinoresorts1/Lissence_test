@@ -9,10 +9,7 @@ import CoreMedia
 
 // 감지할 소리 타입
 enum DangerSound {
-    case siren       // 사이렌
-    case carHorn     // 차량 경적
-    case speech      // 사람 음성
-    case unknown
+    case siren, fireAlarm, shouting, carHorn, knock, dogBarking, glassShattering, speech, unknown
 }
 
 class SoundClassifier: NSObject, ObservableObject {
@@ -49,47 +46,6 @@ class SoundClassifier: NSObject, ObservableObject {
         }
     }
 
-//    private func startEngine() {
-//        audioEngine = AVAudioEngine() // 매번 새로 생성해서 탭 중복 방지
-//        do {
-//            print("1️⃣ 오디오 세션 설정 시작")
-//            let session = AVAudioSession.sharedInstance()
-//            try session.setCategory(.record)
-//            try session.setActive(true)
-//            print("2️⃣ 오디오 세션 활성화 완료")
-//
-//            // SoundAnalysis 요청 생성 (애플 내장 모델)
-//            request = try SNClassifySoundRequest(classifierIdentifier: .version1)
-//            request?.windowDuration = CMTimeMakeWithSeconds(1.5, preferredTimescale: 44100)
-//            request?.overlapFactor = 0.5
-//            print("3️⃣ SoundAnalysis 요청 생성 완료")
-//
-//            // 오디오 엔진 설정 (watchOS는 inputFormat 사용)
-//            let inputNode = audioEngine.inputNode
-//            let inputFormat = inputNode.inputFormat(forBus: 0)
-//            print("4️⃣ 오디오 포맷: \(inputFormat.sampleRate)Hz, 채널: \(inputFormat.channelCount)")
-//            guard inputFormat.sampleRate > 0 else {
-//                print("❌ 유효하지 않은 오디오 포맷")
-//                return
-//            }
-//            analyzer = SNAudioStreamAnalyzer(format: inputFormat)
-//
-//            try analyzer?.add(request!, withObserver: self)
-//
-//            inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, time in
-//                self?.analysisQueue.async {
-//                    self?.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
-//                }
-//            }
-//
-//            try audioEngine.start()
-//            DispatchQueue.main.async { self.isRunning = true }
-//
-//        } catch {
-//            print("❌ SoundClassifier 오류: \(error)")
-//            print("❌ 오류 상세: \(error.localizedDescription)")
-//        }
-//    }
     private func startEngine() {
     // [수정] 기존 엔진의 실행 여부를 확인하고, 탭(Tap) 중복 연결로 인한 크래시를 방지하기 위해 정지 및 제거 로직 추가
     if audioEngine.isRunning {
@@ -149,14 +105,15 @@ class SoundClassifier: NSObject, ObservableObject {
     // MARK: - 소리 타입 매핑
     private func mapToSoundType(_ identifier: String) -> DangerSound? {
         switch identifier {
-        case let id where id.contains("siren"):
-            return .siren
-        case let id where id.contains("car_horn") || id.contains("horn"):
-            return .carHorn
-        case let id where id.contains("speech"), let id where id.contains("shout"):
-            return .speech
-        default:
-            return nil
+        case "siren", "emergency_vehicle": return .siren
+        case "fire_alarm", "smoke_detector": return .fireAlarm
+        case "shouting", "screaming", "yelling": return .shouting
+        case "car_horn", "vehicle_horn": return .carHorn
+        case "knock": return .knock
+        case "dog_barking", "bark": return .dogBarking
+        case "glass_shattering", "explosion", "gunshot": return .glassShattering
+        case "speech", "conversation": return .speech
+        default: return nil
         }
     }
 }
@@ -198,19 +155,37 @@ extension SoundClassifier: SNResultsObserving {
 extension DangerSound {
     var label: String {
         switch self {
-        case .siren:   return "사이렌 감지!"
-        case .carHorn: return "경적 감지!"
-        case .speech:  return "음성 감지"
+        case .siren: return "🚨 긴급 사이렌 감지!"
+        case .fireAlarm: return "🔥 화재 알림 감지!"
+        case .shouting: return "🗣️ 큰 소음/비명 감지!"
+        case .carHorn: return "🚘 차 경적 확인!"
+        case .knock: return "🚪 노크 확인!"
+        case .dogBarking: return "🐕 개 짖는 소리 감지!"
+        case .glassShattering: return "⚠️ 유리 파손/폭발음 주의!"
+        case .speech: return "💬 사람의 말소리 감지"
         case .unknown: return ""
         }
     }
 
     var icon: String {
         switch self {
-        case .siren:   return "bell.and.waves.left.and.right.fill"
+        case .siren: return "bell.badge.fill"
+        case .fireAlarm: return "flame.fill"
+        case .shouting: return "exclamationmark.bubble.fill"
         case .carHorn: return "car.fill"
-        case .speech:  return "person.wave.2.fill"
-        case .unknown: return ""
+        case .knock: return "door.left.hand.closed"
+        case .dogBarking: return "pawprint.fill"
+        case .glassShattering: return "shatter"
+        case .speech: return "person.wave.2.fill"
+        case .unknown: return "exclamationmark.triangle.fill"
+        }
+    }
+    
+    // 위험도 판단 로직 (아이폰의 isDanger와 동기화)
+    var isDanger: Bool {
+        switch self {
+        case .knock, .dogBarking, .speech: return false
+        default: return true
         }
     }
 }

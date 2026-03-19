@@ -14,21 +14,15 @@ class HapticController {
         guard now.timeIntervalSince(lastHapticTime) > cooldown else { return }
         lastHapticTime = now
 
-        switch sound {
-        case .siren:
-            // 사이렌 - 강하고 반복적인 진동
+        if sound.isDanger {
+            // 위험 상황: 강하고 긴 진동 (Success 패턴 + 추가 진동)
             WKInterfaceDevice.current().play(.success)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                WKInterfaceDevice.current().play(.success)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                WKInterfaceDevice.current().play(.directionUp) // 주의를 끄는 상승 진동
             }
-        case .carHorn:
-            // 경적 - 강한 단발 진동
+        } else {
+            // 일반 상황: 가벼운 알림 진동
             WKInterfaceDevice.current().play(.notification)
-        case .speech:
-            // 음성 - 부드러운 진동
-            WKInterfaceDevice.current().play(.click)
-        case .unknown:
-            break
         }
     }
 }
