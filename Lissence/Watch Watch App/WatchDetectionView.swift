@@ -17,7 +17,7 @@ struct WatchDetectionView: View {
             }
             else if classifier.detectedSound != .unknown {
                 // 워치 자체 감지 결과 표시
-                displayInfo(title: classifier.detectedSound.label, icon: classifier.detectedSound.icon, isDanger: true, source: "Watch")
+                displayInfo(title: classifier.detectedSound.label, icon: classifier.detectedSound.icon, isDanger: classifier.detectedSound.isDanger, source: "Watch")
            } else {
                // 데이터가 없을 때 보여줄 기본 화면
                ProgressView()

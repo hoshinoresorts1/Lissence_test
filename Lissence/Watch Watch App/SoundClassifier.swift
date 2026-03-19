@@ -7,11 +7,6 @@ import Combine
 import AVFoundation
 import CoreMedia
 
-// 감지할 소리 타입
-enum DangerSound {
-    case siren, fireAlarm, shouting, carHorn, knock, dogBarking, glassShattering, speech, unknown
-}
-
 class SoundClassifier: NSObject, ObservableObject {
 
     private var audioEngine = AVAudioEngine()
@@ -101,21 +96,6 @@ class SoundClassifier: NSObject, ObservableObject {
             self.confidence = 0
         }
     }
-
-    // MARK: - 소리 타입 매핑
-    private func mapToSoundType(_ identifier: String) -> DangerSound? {
-        switch identifier {
-        case "siren", "emergency_vehicle": return .siren
-        case "fire_alarm", "smoke_detector": return .fireAlarm
-        case "shouting", "screaming", "yelling": return .shouting
-        case "car_horn", "vehicle_horn": return .carHorn
-        case "knock": return .knock
-        case "dog_barking", "bark": return .dogBarking
-        case "glass_shattering", "explosion", "gunshot": return .glassShattering
-        case "speech", "conversation": return .speech
-        default: return nil
-        }
-    }
 }
 
 // MARK: - SNResultsObserving
@@ -123,18 +103,18 @@ extension SoundClassifier: SNResultsObserving {
 
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
-
-        // 신뢰도 높은 순으로 정렬
         let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
 
         for classification in sorted {
             guard classification.confidence >= confidenceThreshold else { break }
-            guard let soundType = mapToSoundType(classification.identifier) else { continue }
-
-            DispatchQueue.main.async { [weak self] in
-                self?.detectedSound = soundType
-                self?.confidence = classification.confidence
-                self?.onDangerDetected?(soundType, classification.confidence)
+            
+            // [수정] 하드코딩 제거
+            if let soundType = DangerSound.from(identifier: classification.identifier) {
+                DispatchQueue.main.async { [weak self] in
+                    self?.detectedSound = soundType
+                    self?.confidence = classification.confidence
+                    self?.onDangerDetected?(soundType, classification.confidence)
+                }
             }
             return
         }
@@ -148,44 +128,5 @@ extension SoundClassifier: SNResultsObserving {
 
     func request(_ request: SNRequest, didFailWithError error: Error) {
         print("분류 오류: \(error)")
-    }
-}
-
-// DangerSound enum에 UI용 편의 속성 추가
-extension DangerSound {
-    var label: String {
-        switch self {
-        case .siren: return "🚨 긴급 사이렌 감지!"
-        case .fireAlarm: return "🔥 화재 알림 감지!"
-        case .shouting: return "🗣️ 큰 소음/비명 감지!"
-        case .carHorn: return "🚘 차 경적 확인!"
-        case .knock: return "🚪 노크 확인!"
-        case .dogBarking: return "🐕 개 짖는 소리 감지!"
-        case .glassShattering: return "⚠️ 유리 파손/폭발음 주의!"
-        case .speech: return "💬 사람의 말소리 감지"
-        case .unknown: return ""
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .siren: return "bell.badge.fill"
-        case .fireAlarm: return "flame.fill"
-        case .shouting: return "exclamationmark.bubble.fill"
-        case .carHorn: return "car.fill"
-        case .knock: return "door.left.hand.closed"
-        case .dogBarking: return "pawprint.fill"
-        case .glassShattering: return "shatter"
-        case .speech: return "person.wave.2.fill"
-        case .unknown: return "exclamationmark.triangle.fill"
-        }
-    }
-    
-    // 위험도 판단 로직 (아이폰의 isDanger와 동기화)
-    var isDanger: Bool {
-        switch self {
-        case .knock, .dogBarking, .speech: return false
-        default: return true
-        }
     }
 }
