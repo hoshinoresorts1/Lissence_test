@@ -1,3 +1,6 @@
+/// 공통 데이터 규격(Shared Group)
+/// - 위험 데이터 구조체 매핑
+
 import Foundation
 
 enum DangerSound: String, CaseIterable {
