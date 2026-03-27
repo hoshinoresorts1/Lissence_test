@@ -9,8 +9,21 @@
 /* Begin PBXBuildFile section */
 		C306EAB62F6C0F3200AFE6F5 /* DangerSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */; };
 		C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */; };
+		C34B949E2F75072600ADDF8E /* DetectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94942F75072600ADDF8E /* DetectionDetailView.swift */; };
+		C34B94A02F75072600ADDF8E /* MainHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94972F75072600ADDF8E /* MainHomeView.swift */; };
+		C34B94A12F75072600ADDF8E /* MusicDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94982F75072600ADDF8E /* MusicDetailView.swift */; };
+		C34B94A22F75072600ADDF8E /* SoundDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94992F75072600ADDF8E /* SoundDetector.swift */; };
+		C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B949A2F75072600ADDF8E /* SpeechManager.swift */; };
+		C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */; };
+		C34B94AD2F75072600ADDF8E /* HapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A62F75072600ADDF8E /* HapticController.swift */; };
+		C34B94AE2F75072600ADDF8E /* SoundClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A72F75072600ADDF8E /* SoundClassifier.swift */; };
+		C34B94B02F75072600ADDF8E /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A92F75072600ADDF8E /* WatchContentView.swift */; };
+		C34B94B12F75072600ADDF8E /* WatchDetectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94AA2F75072600ADDF8E /* WatchDetectionView.swift */; };
+		C34B94B22F75072600ADDF8E /* WatchMusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94AB2F75072600ADDF8E /* WatchMusicView.swift */; };
 		C34B94B62F76475600ADDF8E /* MessageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94B52F76475600ADDF8E /* MessageData.swift */; };
 		C34B94B72F76475600ADDF8E /* MessageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94B52F76475600ADDF8E /* MessageData.swift */; };
+		C34B94BF2F764D8600ADDF8E /* DetectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */; };
+		C34B94C42F764DEC00ADDF8E /* WatchDetectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */; };
 		C3B57C5C2F5EDD12002C9D36 /* Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
 		C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
@@ -43,7 +56,20 @@
 /* Begin PBXFileReference section */
 		49130A712F44376B00B10708 /* Lissence.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lissence.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DangerSound.swift; sourceTree = "<group>"; };
+		C34B94942F75072600ADDF8E /* DetectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionDetailView.swift; sourceTree = "<group>"; };
+		C34B94972F75072600ADDF8E /* MainHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainHomeView.swift; sourceTree = "<group>"; };
+		C34B94982F75072600ADDF8E /* MusicDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicDetailView.swift; sourceTree = "<group>"; };
+		C34B94992F75072600ADDF8E /* SoundDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundDetector.swift; sourceTree = "<group>"; };
+		C34B949A2F75072600ADDF8E /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
+		C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleWidgetView.swift; sourceTree = "<group>"; };
+		C34B94A62F75072600ADDF8E /* HapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticController.swift; sourceTree = "<group>"; };
+		C34B94A72F75072600ADDF8E /* SoundClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundClassifier.swift; sourceTree = "<group>"; };
+		C34B94A92F75072600ADDF8E /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		C34B94AA2F75072600ADDF8E /* WatchDetectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDetectionView.swift; sourceTree = "<group>"; };
+		C34B94AB2F75072600ADDF8E /* WatchMusicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMusicView.swift; sourceTree = "<group>"; };
 		C34B94B52F76475600ADDF8E /* MessageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageData.swift; sourceTree = "<group>"; };
+		C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionViewModel.swift; sourceTree = "<group>"; };
+		C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDetectionViewModel.swift; sourceTree = "<group>"; };
 		C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -95,7 +121,8 @@
 		49130A682F44376B00B10708 = {
 			isa = PBXGroup;
 			children = (
-				C34B94B42F76472E00ADDF8E /* Services */,
+				C34B94BA2F764AE000ADDF8E /* Domain */,
+				C34B94B92F764A7B00ADDF8E /* Presentaion */,
 				C34B94B32F76470D00ADDF8E /* Shared */,
 				49130A732F44376B00B10708 /* Lissence */,
 				C3B57C532F5EDD10002C9D36 /* Watch Watch App */,
@@ -115,8 +142,8 @@
 		C34B94B32F76470D00ADDF8E /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */,
-				C34B94B52F76475600ADDF8E /* MessageData.swift */,
+				C34B94B82F7649F900ADDF8E /* Models */,
+				C34B94B42F76472E00ADDF8E /* Services */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -127,6 +154,90 @@
 				C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		C34B94B82F7649F900ADDF8E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C306EAB52F6C0F3200AFE6F5 /* DangerSound.swift */,
+				C34B94B52F76475600ADDF8E /* MessageData.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C34B94B92F764A7B00ADDF8E /* Presentaion */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94C02F764D9700ADDF8E /* Watch */,
+				C34B94BB2F764D2800ADDF8E /* iPhone */,
+			);
+			path = Presentaion;
+			sourceTree = "<group>";
+		};
+		C34B94BA2F764AE000ADDF8E /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94992F75072600ADDF8E /* SoundDetector.swift */,
+				C34B949A2F75072600ADDF8E /* SpeechManager.swift */,
+				C34B94A72F75072600ADDF8E /* SoundClassifier.swift */,
+				C34B94A62F75072600ADDF8E /* HapticController.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		C34B94BB2F764D2800ADDF8E /* iPhone */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94BD2F764D6100ADDF8E /* ViewModels */,
+				C34B94BC2F764D4500ADDF8E /* Views */,
+			);
+			path = iPhone;
+			sourceTree = "<group>";
+		};
+		C34B94BC2F764D4500ADDF8E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94972F75072600ADDF8E /* MainHomeView.swift */,
+				C34B94942F75072600ADDF8E /* DetectionDetailView.swift */,
+				C34B94982F75072600ADDF8E /* MusicDetailView.swift */,
+				C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C34B94BD2F764D6100ADDF8E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C34B94C02F764D9700ADDF8E /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94C22F764DA900ADDF8E /* ViewModels */,
+				C34B94C12F764DA400ADDF8E /* Views */,
+			);
+			path = Watch;
+			sourceTree = "<group>";
+		};
+		C34B94C12F764DA400ADDF8E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94A92F75072600ADDF8E /* WatchContentView.swift */,
+				C34B94AA2F75072600ADDF8E /* WatchDetectionView.swift */,
+				C34B94AB2F75072600ADDF8E /* WatchMusicView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C34B94C22F764DA900ADDF8E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -238,7 +349,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C34B949E2F75072600ADDF8E /* DetectionDetailView.swift in Sources */,
+				C34B94A02F75072600ADDF8E /* MainHomeView.swift in Sources */,
+				C34B94BF2F764D8600ADDF8E /* DetectionViewModel.swift in Sources */,
+				C34B94A12F75072600ADDF8E /* MusicDetailView.swift in Sources */,
+				C34B94A22F75072600ADDF8E /* SoundDetector.swift in Sources */,
 				C34B94B62F76475600ADDF8E /* MessageData.swift in Sources */,
+				C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */,
+				C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */,
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
 				C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);
@@ -248,8 +366,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C34B94AD2F75072600ADDF8E /* HapticController.swift in Sources */,
+				C34B94AE2F75072600ADDF8E /* SoundClassifier.swift in Sources */,
+				C34B94B02F75072600ADDF8E /* WatchContentView.swift in Sources */,
 				C34B94B72F76475600ADDF8E /* MessageData.swift in Sources */,
+				C34B94B12F75072600ADDF8E /* WatchDetectionView.swift in Sources */,
+				C34B94B22F75072600ADDF8E /* WatchMusicView.swift in Sources */,
 				C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
+				C34B94C42F764DEC00ADDF8E /* WatchDetectionViewModel.swift in Sources */,
 				C306EAB62F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
