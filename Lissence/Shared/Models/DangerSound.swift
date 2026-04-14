@@ -1,7 +1,10 @@
+/// 공통 데이터 규격(Shared Group)
+/// - 위험 데이터 구조체 매핑
+
 import Foundation
 
 enum DangerSound: String, CaseIterable {
-    case siren, fireAlarm, shouting, carHorn, knock, laughter, babyCrying, speech, unknown
+    case siren, fireAlarm, shouting, carHorn, knock, speech, unknown
 
     // 1. 표시용 텍스트 (라벨)
     var label: String {
@@ -11,8 +14,6 @@ enum DangerSound: String, CaseIterable {
         case .shouting: return "🗣️ 큰 소음/비명 감지!"
         case .carHorn: return "🚘 차 경적 감지!"
         case .knock: return "🚪 노크 소리가 들려요!"
-        case .laughter: return "😊 웃음소리가 들려요!"
-        case .babyCrying: return "👶 아기 울음소리 감지!"
         case .speech: return "💬 사람의 말소리가 들려요~"
         case .unknown: return ""
         }
@@ -26,8 +27,6 @@ enum DangerSound: String, CaseIterable {
         case .shouting: return "exclamationmark.bubble.fill"
         case .carHorn: return "car.fill"
         case .knock: return "door.left.hand.closed"
-        case .laughter: return "face.smiling.fill"
-        case .babyCrying: return "figure.and.child.holdinghands"
         case .speech: return "person.wave.2.fill"
         case .unknown: return "questionmark.circle"
         }
@@ -36,7 +35,7 @@ enum DangerSound: String, CaseIterable {
     // 3. 위험 여부 판단
     var isDanger: Bool {
         switch self {
-        case .knock, .laughter, .speech: return false
+        case .knock, .speech: return false
         default: return true
         }
     }
@@ -49,8 +48,6 @@ enum DangerSound: String, CaseIterable {
         case "shouting", "screaming", "yelling": return .shouting
         case "car_horn", "vehicle_horn": return .carHorn
         case "knock": return .knock
-        case "laughter", "giggle", "chuckle": return .laughter
-        case "baby_crying": return .babyCrying
         case "speech", "conversation": return .speech
         default: return nil
         }
