@@ -4,20 +4,19 @@ import SwiftUI
 
 struct WatchDetectionView: View {
     
-    /// 기존 : 아이폰 연동 매니저
-    @StateObject var connectivity = ConnectivityManager.shared
-    /// 추가 : 워치 단독 감지 엔진
-    @StateObject private var classifier = SoundClassifier()
-
+    /// ViewModel로 통합
+    @StateObject private var viewModel = WatchDetectionViewModel()
+    
     var body: some View {
         VStack {
-            // 상황 판별 (아이폰 감지 내용 우선 표시 / 없으면 워치 자체 감지 결과 표시)
-            if let message = connectivity.receivedMessage {
-                displayInfo(title: message.title, icon: message.iconName, isDanger: message.isDanger, source: "iPhone")
-            }
-            else if classifier.detectedSound != .unknown {
-                // 워치 자체 감지 결과 표시
-                displayInfo(title: classifier.detectedSound.label, icon: classifier.detectedSound.icon, isDanger: classifier.detectedSound.isDanger, source: "Watch")
+            // 2. 뷰모델에서 정제된 상태(hasData)만 판단합니다.
+            if viewModel.hasData {
+                displayInfo(
+                    title: viewModel.displayTitle,
+                    icon: viewModel.displayIcon,
+                    isDanger: viewModel.isDanger,
+                    source: viewModel.sourceText
+                )
            } else {
                // 데이터가 없을 때 보여줄 기본 화면
                ProgressView()
@@ -28,12 +27,11 @@ struct WatchDetectionView: View {
         }
         .navigationTitle("감지 모드")
             .onAppear() {
-                classifier.start() // 화면 진입 시 워치 마이크 감지 시작
-                setupHapticCallBack()
+                // 3. 엔진 제어권을 뷰모델에 넘깁니다.
+                viewModel.startDetection()
         }
             .onDisappear {
-                classifier.stop() // 화면 나가면 중지
-            }
+                viewModel.stopDetection()            }
         }
     
     // 공통 UI 컴포넌트
@@ -54,17 +52,11 @@ struct WatchDetectionView: View {
         
         Text(title)
             .font(.headline)
+            .multilineTextAlignment(.center)
         
         Text("\(source)에서 감지됨!")
             .font(.caption2)
             .foregroundColor(.gray)
-    }
-
-    /// 워치 자체 감지시 진동 실행
-    private func setupHapticCallBack() {
-        classifier.onDangerDetected = { sound, confidence in
-            HapticController.shared.play(for: sound)
-        }
     }
 }
 

@@ -1,133 +1,149 @@
 /// 애플워치용 소리 분석 엔진
 /// 소리 분석 핵심 엔진 (가장 중요)
+/// - 상태 체크와 충돌 방지 지연 추가
 
 import SoundAnalysis
 import WatchKit
 import Foundation
 import Combine
 import AVFoundation
-import CoreMedia
+
 
 class SoundClassifier: NSObject, ObservableObject {
 
     private var audioEngine = AVAudioEngine()
     private var analyzer: SNAudioStreamAnalyzer?
     private var request: SNClassifySoundRequest?
-    private let analysisQueue = DispatchQueue(label: "SoundAnalysisQueue")
-    /// 워치 화면이 꺼져도 감지를 유지
+    private let analysisQueue = DispatchQueue(label: "com.Lissence.AnalysisQueue")
     private var extendedSession: WKExtendedRuntimeSession?
 
     @Published var isRunning = false
     @Published var detectedSound: DangerSound = .unknown
-    @Published var confidence: Double = 0
 
-    var onDangerDetected: ((DangerSound, Double) -> Void)?
-
-    // 신뢰도 임계값 (이 이상일 때만 반응)
+    // 신뢰도 임계값은 내부에서 상수로 관리하거나 설정 가능하게 유지
     var confidenceThreshold: Double = 0.6
 
-    // MARK: - 시작
+    // MARK: - 시작 제어
     func start() {
+        // 이미 실행 중이면 중복 실행 방지
+        guard !audioEngine.isRunning else { return }
+        
         AVAudioApplication.requestRecordPermission { [weak self] granted in
             guard granted else {
                 print("마이크 권한 거부됨")
                 return
             }
+            
+            // 오디오 엔진 시작 전 세션 설정
+            self?.configureAudioSession()
+            
             DispatchQueue.main.async {
                 // Extended Runtime Session 시작 (watchOS 백그라운드 유지)
                 self?.extendedSession = WKExtendedRuntimeSession()
                 self?.extendedSession?.start()
-                self?.startEngine()
+                
+                // 엔진 시작 시점에 0.1초의 짧은 지연을 주어 시스템 자원 확보
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self?.startEngine()
+                }
             }
+        }
+    }
+    
+    private func configureAudioSession() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            // watchOS에 최적화된 카테고리 설정
+            try session.setCategory(.playAndRecord, mode: .default, options: [.duckOthers])
+            try session.setActive(true)
+        } catch {
+            print("오디오 세션 활성화 실패: \(error)")
         }
     }
 
     private func startEngine() {
-    // [수정] 기존 엔진의 실행 여부를 확인하고, 탭(Tap) 중복 연결로 인한 크래시를 방지하기 위해 정지 및 제거 로직 추가
-    if audioEngine.isRunning {
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
-    }
+    // 탭(Tap) 중복 방지를 위한 사전 제거
+    audioEngine.inputNode.removeTap(onBus: 0)
+            
+    let inputNode = audioEngine.inputNode
+    let recordingFormat = inputNode.outputFormat(forBus: 0)
+    analyzer = SNAudioStreamAnalyzer(format: recordingFormat)
 
     do {
-        let audioSession = AVAudioSession.sharedInstance()
-        // [수정] 단순 녹음(.record)에서 측정 모드(.measurement)와 타 앱 소리 감소(duckOthers) 옵션을 추가하여 오디오 분석 안정성 강화
-        try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-        try audioSession.setActive(true)
-        
-        let inputNode = audioEngine.inputNode
-        // [수정] 하드웨어 입력을 그대로 쓰는 대신, 분석기에 최적화된 출력 포맷(outputFormat)을 사용하여 호환성 문제 해결
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        
-        analyzer = SNAudioStreamAnalyzer(format: recordingFormat)
-        request = try SNClassifySoundRequest(classifierIdentifier: .version1)
-        try analyzer?.add(request!, withObserver: self)
-        
-        // [수정] 버퍼 사이즈를 8192로 확장하여 watchOS의 제한된 자원 환경에서 오버플로우 및 연산 부하로 인한 튕김 현상 방지
-        inputNode.installTap(onBus: 0, bufferSize: 8192, format: recordingFormat) { [weak self] buffer, time in
-            self?.analysisQueue.async {
-                self?.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
+        let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
+            try analyzer?.add(request, withObserver: self)
+            
+            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, time in
+                self?.analysisQueue.async {
+                    self?.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
+                }
             }
-        }
-        
-        // [수정] 엔진 시작(start) 전 prepare()를 명시적으로 호출하여 시스템 자원을 미리 할당받음으로써 실행 시점 크래시 예방
-        audioEngine.prepare()
-        try audioEngine.start()
-        
-        DispatchQueue.main.async {
-            self.isRunning = true
-        }
+            
+            audioEngine.prepare()
+            try audioEngine.start()
+            
+            DispatchQueue.main.async {
+                self.isRunning = true
+            }
     } catch {
-        print("엔진 시작 실패: \(error.localizedDescription)")
+        print("엔진 시작 에러: \(error)")
+        stop() // 실패 시 자원 정리
     }
 }
 
-    // MARK: - 중지
+    // MARK: - 중지 제어 (자원 해제 필수)
     func stop() {
-        extendedSession?.invalidate()
-        extendedSession = nil
+        if audioEngine.isRunning {
+            audioEngine.stop()
+        }
         audioEngine.inputNode.removeTap(onBus: 0)
-        audioEngine.stop()
         analyzer?.removeAllRequests()
-        try? AVAudioSession.sharedInstance().setActive(false)
-
+        
+        // 세션 비활성화로 자원 반납
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        
+        extendedSession?.invalidate()
+        
         DispatchQueue.main.async {
             self.isRunning = false
             self.detectedSound = .unknown
-            self.confidence = 0
         }
     }
 }
 
-// MARK: - SNResultsObserving
+// MARK: - SNResultsObserving 채택
 extension SoundClassifier: SNResultsObserving {
-
+    
+    /// 소리 분석 결과가 나올 때마다 호출되는 함수 (삭제되었던 request 함수 복구)
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
-        let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
-
-        for classification in sorted {
-            guard classification.confidence >= confidenceThreshold else { break }
+        
+        // 가장 신뢰도가 높은 결과 추출
+        if let classification = result.classifications.sorted(by: { $0.confidence > $1.confidence }).first {
             
-            // [수정] 하드코딩 제거
-            if let soundType = DangerSound.from(identifier: classification.identifier) {
-                DispatchQueue.main.async { [weak self] in
-                    self?.detectedSound = soundType
-                    self?.confidence = classification.confidence
-                    self?.onDangerDetected?(soundType, classification.confidence)
+            // 임계값보다 높고, 정의된 위험 소리인 경우
+            if classification.confidence >= confidenceThreshold,
+               let soundType = DangerSound.from(identifier: classification.identifier) {
+                
+                DispatchQueue.main.async {
+                    // ViewModel이 보고 있는 변수 업데이트
+                    self.detectedSound = soundType
+                }
+            } else {
+                // 감지된 소리가 없거나 신뢰도가 낮으면 unknown으로 초기화
+                DispatchQueue.main.async {
+                    self.detectedSound = .unknown
                 }
             }
-            return
-        }
-
-        // 아무것도 감지 못했을 때
-        DispatchQueue.main.async { [weak self] in
-            self?.detectedSound = .unknown
-            self?.confidence = 0
         }
     }
 
     func request(_ request: SNRequest, didFailWithError error: Error) {
-        print("분류 오류: \(error)")
+        print("분류 오류: \(error.localizedDescription)")
+        self.stop()
+    }
+    
+    func requestDidComplete(_ request: SNRequest) {
+        // 분석 완료 시 로직 (필요 시)
     }
 }
