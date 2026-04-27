@@ -1,6 +1,7 @@
 /// 감지모드
 
 import SwiftUI
+import UserNotifications
 
 struct WatchDetectionView: View {
     
@@ -29,6 +30,9 @@ struct WatchDetectionView: View {
             .onAppear() {
                 // 3. 엔진 제어권을 뷰모델에 넘깁니다.
                 viewModel.startDetection()
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+                    if granted { print("알림 권한 승인됨") }
+                }
         }
             .onDisappear {
                 viewModel.stopDetection()            }

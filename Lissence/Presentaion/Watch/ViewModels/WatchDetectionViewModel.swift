@@ -43,9 +43,14 @@ class WatchDetectionViewModel: ObservableObject {
             .filter { $0 != .unknown } // 알 수 없는 소리는 제외
             .sink { [weak self] sound in
                 self?.haptic.play(for: sound)
+                
+                // 위험 상황일 때만 로컬 알림으로 화면 깨우기
+                if sound.isDanger {
+                    self?.sendWakeUpNotification(title: sound.label)
+                }
             }
             .store(in: &cancellables)
-
+        
         // 3. iPhone에서 메시지가 왔을 때도 햅틱을 실행하고 싶다면 아래 코드를 추가합니다.
         connectivity.$receivedMessage
             .compactMap { $0 }
@@ -58,6 +63,16 @@ class WatchDetectionViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    private func sendWakeUpNotification(title: String) {
+            let content = UNMutableNotificationContent()
+            content.title = "⚠️ 위험 감지"
+            content.body = title
+            content.sound = .default
+            
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request)
+        }
     
     /// 데이터 우선순위에 따라 UI 상태를 업데이트합니다.
     /// 우선순위: iPhone 메시지 > Watch 감지 결과
