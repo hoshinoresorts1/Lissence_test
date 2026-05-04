@@ -21,10 +21,14 @@ class WatchDetectionViewModel: ObservableObject {
     @Published var sourceText: String = ""
     @Published var hasData: Bool = false
     
+    // UI에서 저전력 모드 상태를 표시하고 싶다면 추가
+    @Published var isLowPowerMode: Bool = ProcessInfo.processInfo.isLowPowerModeEnabled
+    
     private var cancellables = Set<AnyCancellable>()
     
     init() {
         setupBindings()
+        setupLowPowerModeObserver()
     }
     
     // MARK: - 데이터 흐름 통합 (Combine)
@@ -64,6 +68,18 @@ class WatchDetectionViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // [신규] 저전력 모드 변경 관찰 로직
+    private func setupLowPowerModeObserver() {
+        NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                // 시스템 상태가 변하면 뷰모델의 변수도 업데이트하여 UI에 반영
+                self?.isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+                print("시스템 전원 모드 변경됨: \(String(describing: self?.isLowPowerMode))")
+            }
+            .store(in: &cancellables)
+    }
+    
     private func sendWakeUpNotification(title: String) {
             let content = UNMutableNotificationContent()
             content.title = "⚠️ 위험 감지"
@@ -93,8 +109,8 @@ class WatchDetectionViewModel: ObservableObject {
             self.hasData = true
         } else {
             // 아무 데이터도 없을 때 (초기 상태)
-            self.displayTitle = "소리 대기 중..."
-            self.displayIcon = "waveform.and.mic"
+            self.displayTitle = isLowPowerMode ? "절약 모드 대기 중..." : "소리 대기 중..."
+            self.displayIcon = isLowPowerMode ? "battery.100.bolt" : "waveform.and.mic"
             self.isDanger = false
             self.sourceText = ""
             self.hasData = false
@@ -102,11 +118,6 @@ class WatchDetectionViewModel: ObservableObject {
     }
     
     // MARK: - 엔진 제어
-    func startDetection() {
-        classifier.start()
-    }
-    
-    func stopDetection() {
-        classifier.stop()
-    }
+    func startDetection() { classifier.start() }
+    func stopDetection() { classifier.stop() }
 }
