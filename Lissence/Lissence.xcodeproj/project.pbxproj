@@ -122,7 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				C34B94BA2F764AE000ADDF8E /* Domain */,
-				C34B94B92F764A7B00ADDF8E /* Presentaion */,
+				C34B94B92F764A7B00ADDF8E /* Presentation */,
 				C34B94B32F76470D00ADDF8E /* Shared */,
 				49130A732F44376B00B10708 /* Lissence */,
 				C3B57C532F5EDD10002C9D36 /* Watch Watch App */,
@@ -165,13 +165,13 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		C34B94B92F764A7B00ADDF8E /* Presentaion */ = {
+		C34B94B92F764A7B00ADDF8E /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
 				C34B94C02F764D9700ADDF8E /* Watch */,
 				C34B94BB2F764D2800ADDF8E /* iPhone */,
 			);
-			path = Presentaion;
+			path = Presentation;
 			sourceTree = "<group>";
 		};
 		C34B94BA2F764AE000ADDF8E /* Domain */ = {
