@@ -27,6 +27,14 @@
 		C3B57C5C2F5EDD12002C9D36 /* Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
 		C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
+		C4A100112FA2000000000001 /* MusicMood.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100012FA2000000000001 /* MusicMood.swift */; };
+		C4A100122FA2000000000001 /* MusicMoodPrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100022FA2000000000001 /* MusicMoodPrediction.swift */; };
+		C4A100132FA2000000000001 /* MusicMoodModelClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100032FA2000000000001 /* MusicMoodModelClassifier.swift */; };
+		C4A100142FA2000000000001 /* AudioFeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100042FA2000000000001 /* AudioFeatureExtractor.swift */; };
+		C4A100152FA2000000000001 /* TrainingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100052FA2000000000001 /* TrainingStats.swift */; };
+		C4A100162FA2000000000001 /* MusicAudioWindowRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */; };
+		C4A100172FA2000000000001 /* MusicMoodAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */; };
+		C4A100182FA2000000000001 /* MusicViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100082FA2000000000001 /* MusicViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +80,14 @@
 		C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDetectionViewModel.swift; sourceTree = "<group>"; };
 		C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityManager.swift; sourceTree = "<group>"; };
+		C4A100012FA2000000000001 /* MusicMood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMood.swift; sourceTree = "<group>"; };
+		C4A100022FA2000000000001 /* MusicMoodPrediction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMoodPrediction.swift; sourceTree = "<group>"; };
+		C4A100032FA2000000000001 /* MusicMoodModelClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMoodModelClassifier.swift; sourceTree = "<group>"; };
+		C4A100042FA2000000000001 /* AudioFeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeatureExtractor.swift; sourceTree = "<group>"; };
+		C4A100052FA2000000000001 /* TrainingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingStats.swift; sourceTree = "<group>"; };
+		C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAudioWindowRecorder.swift; sourceTree = "<group>"; };
+		C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMoodAnalyzer.swift; sourceTree = "<group>"; };
+		C4A100082FA2000000000001 /* MusicViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -177,6 +193,7 @@
 		C34B94BA2F764AE000ADDF8E /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				C4A100002FA2000000000001 /* Music */,
 				C34B94992F75072600ADDF8E /* SoundDetector.swift */,
 				C34B949A2F75072600ADDF8E /* SpeechManager.swift */,
 				C34B94A72F75072600ADDF8E /* SoundClassifier.swift */,
@@ -209,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */,
+				C4A100082FA2000000000001 /* MusicViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -238,6 +256,20 @@
 				C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C4A100002FA2000000000001 /* Music */ = {
+			isa = PBXGroup;
+			children = (
+				C4A100012FA2000000000001 /* MusicMood.swift */,
+				C4A100022FA2000000000001 /* MusicMoodPrediction.swift */,
+				C4A100032FA2000000000001 /* MusicMoodModelClassifier.swift */,
+				C4A100042FA2000000000001 /* AudioFeatureExtractor.swift */,
+				C4A100052FA2000000000001 /* TrainingStats.swift */,
+				C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */,
+				C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */,
+			);
+			path = Music;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -349,15 +381,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4A100122FA2000000000001 /* MusicMoodPrediction.swift in Sources */,
 				C34B949E2F75072600ADDF8E /* DetectionDetailView.swift in Sources */,
+				C4A100142FA2000000000001 /* AudioFeatureExtractor.swift in Sources */,
 				C34B94A02F75072600ADDF8E /* MainHomeView.swift in Sources */,
 				C34B94BF2F764D8600ADDF8E /* DetectionViewModel.swift in Sources */,
+				C4A100152FA2000000000001 /* TrainingStats.swift in Sources */,
 				C34B94A12F75072600ADDF8E /* MusicDetailView.swift in Sources */,
 				C34B94A22F75072600ADDF8E /* SoundDetector.swift in Sources */,
+				C4A100112FA2000000000001 /* MusicMood.swift in Sources */,
 				C34B94B62F76475600ADDF8E /* MessageData.swift in Sources */,
+				C4A100162FA2000000000001 /* MusicAudioWindowRecorder.swift in Sources */,
 				C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */,
 				C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */,
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
+				C4A100132FA2000000000001 /* MusicMoodModelClassifier.swift in Sources */,
+				C4A100182FA2000000000001 /* MusicViewModel.swift in Sources */,
+				C4A100172FA2000000000001 /* MusicMoodAnalyzer.swift in Sources */,
 				C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -426,7 +466,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -489,7 +529,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
