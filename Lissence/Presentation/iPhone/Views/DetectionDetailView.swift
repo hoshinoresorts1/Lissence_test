@@ -23,7 +23,12 @@ struct DetectionDetailView: View {
         .sheet(isPresented: $viewModel.isVoiceOn) {
             SubtitleWidgetView(
                 isShowing: $viewModel.isVoiceOn,
-                text: viewModel.transcript.isEmpty ? "소리를 기다리고 있습니다..." : viewModel.transcript
+                text: Binding(
+                    get: {
+                        viewModel.transcript.isEmpty ? "소리를 기다리고 있습니다..." : viewModel.transcript
+                    },
+                    set: { _ in }
+                )
             )
             .interactiveDismissDisabled() // 제스처로 끄기 방지 (버튼으로만 끄게 함)
         }

@@ -56,9 +56,11 @@ class DetectionViewModel: ObservableObject {
         if isVoiceOn {
             // 1. 음성 인식 시작 전, 소리 감지를 잠시 중단하여 충돌 방지
             soundDetector.stopDetection()
+            print("[DetectionViewModel] SoundDetector.stopDetection called before speech start")
             
             // 2. 약간의 시간차를 두어 오디오 세션이 정리될 시간을 줍니다.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                print("[DetectionViewModel] starting speechManager.startRecording after 0.1s delay")
                 self.speechManager.startRecording()
             }
         } else {

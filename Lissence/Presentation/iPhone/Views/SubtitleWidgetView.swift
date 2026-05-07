@@ -4,7 +4,7 @@ import SwiftUI
 
 struct SubtitleWidgetView: View {
     @Binding var isShowing: Bool
-    let text: String
+    @Binding var text: String
     
     @State private var detent: PresentationDetent = .height(350)
 
