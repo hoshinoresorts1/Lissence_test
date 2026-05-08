@@ -20,6 +20,8 @@ struct LissenceApp: App {
                     DetectionDetailView(currentPath: $currentPath)
                 } else if currentPath == "music" {
                     MusicDetailView(currentPath: $currentPath)
+                } else if currentPath == "bleTest" {
+                    BLETestView(currentPath: $currentPath)
                 }
             }
             .animation(.easeInOut, value: currentPath) // 화면 전환
