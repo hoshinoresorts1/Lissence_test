@@ -30,9 +30,7 @@ struct WatchDetectionView: View {
             .onAppear() {
                 // 3. 엔진 제어권을 뷰모델에 넘깁니다.
                 viewModel.startDetection()
-                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-                    if granted { print("알림 권한 승인됨") }
-                }
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         }
             .onDisappear {
                 viewModel.stopDetection()            }
@@ -63,4 +61,3 @@ struct WatchDetectionView: View {
             .foregroundColor(.gray)
     }
 }
-

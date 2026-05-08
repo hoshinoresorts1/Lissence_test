@@ -75,7 +75,6 @@ class WatchDetectionViewModel: ObservableObject {
             .sink { [weak self] _ in
                 // 시스템 상태가 변하면 뷰모델의 변수도 업데이트하여 UI에 반영
                 self?.isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
-                print("시스템 전원 모드 변경됨: \(String(describing: self?.isLowPowerMode))")
             }
             .store(in: &cancellables)
     }

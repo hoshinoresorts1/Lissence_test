@@ -27,9 +27,6 @@ class SpeechManager: NSObject, ObservableObject {
 
     /// Speech 권한과 마이크 권한을 확인한 뒤 음성 인식을 시작합니다.
     func startRecording() {
-        print("[SpeechManager] startRecording called")
-        print("[SpeechManager] current speech authorizationStatus: \(SFSpeechRecognizer.authorizationStatus().rawValue)")
-
         requestSpeechAuthorization { [weak self] speechGranted in
             guard let self else { return }
 
@@ -55,7 +52,6 @@ class SpeechManager: NSObject, ObservableObject {
                 }
 
                 DispatchQueue.main.async {
-                    print("[SpeechManager] permissions granted, beginRecognition scheduled")
                     self.beginRecognition()
                 }
             }
@@ -78,22 +74,17 @@ class SpeechManager: NSObject, ObservableObject {
     /// Speech 프레임워크 권한 상태를 확인하고 필요 시 요청합니다.
     private func requestSpeechAuthorization(completion: @escaping (Bool) -> Void) {
         let status = SFSpeechRecognizer.authorizationStatus()
-        print("[SpeechManager] requestSpeechAuthorization status before request: \(status.rawValue)")
 
         switch status {
         case .authorized:
-            print("[SpeechManager] speech authorization already authorized")
             completion(true)
         case .notDetermined:
             SFSpeechRecognizer.requestAuthorization { status in
-                print("[SpeechManager] requestAuthorization result: \(status.rawValue)")
                 completion(status == .authorized)
             }
         case .denied, .restricted:
-            print("[SpeechManager] speech authorization unavailable: \(status.rawValue)")
             completion(false)
         @unknown default:
-            print("[SpeechManager] speech authorization unknown default")
             completion(false)
         }
     }
@@ -101,7 +92,6 @@ class SpeechManager: NSObject, ObservableObject {
     /// 마이크 권한 상태를 확인하고 필요 시 요청합니다.
     private func requestMicrophonePermission(completion: @escaping (Bool) -> Void) {
         AVAudioApplication.requestRecordPermission { granted in
-            print("[SpeechManager] microphone permission granted: \(granted)")
             completion(granted)
         }
     }
@@ -110,13 +100,8 @@ class SpeechManager: NSObject, ObservableObject {
 
     /// 권한이 확보된 상태에서 실제 Speech 인식 파이프라인을 시작합니다.
     private func beginRecognition() {
-        print("[SpeechManager] beginRecognition called")
-        print("[SpeechManager] speech authorization before recognitionTask: \(SFSpeechRecognizer.authorizationStatus().rawValue)")
-        print("[SpeechManager] speechRecognizer available: \(speechRecognizer != nil)")
-
         // 기존 작업이 있다면 취소
         if recognitionTask != nil {
-            print("[SpeechManager] cancel existing recognitionTask before restart")
             recognitionTask?.cancel()
             recognitionTask = nil
         }
@@ -125,9 +110,7 @@ class SpeechManager: NSObject, ObservableObject {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            print("[SpeechManager] AVAudioSession.setCategory success")
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-            print("[SpeechManager] AVAudioSession.setActive(true) success")
         } catch {
             transcript = "오디오 세션 설정에 실패했습니다."
             print("[SpeechManager] audio session setup failed: \(error.localizedDescription)")
@@ -135,18 +118,15 @@ class SpeechManager: NSObject, ObservableObject {
         }
 
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        print("[SpeechManager] recognitionRequest created: \(recognitionRequest != nil)")
 
         guard let recognitionRequest = recognitionRequest else { return }
         recognitionRequest.shouldReportPartialResults = true // 말하는 도중에도 결과 보여주기
-        print("[SpeechManager] recognitionRequest.shouldReportPartialResults = true")
 
         // 음성 인식 시작
         recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
             if let result = result {
                 // 실시간으로 변환된 텍스트를 transcript에 저장
                 DispatchQueue.main.async {
-                    print("[SpeechManager] recognitionTask transcript: \(result.bestTranscription.formattedString)")
                     self.transcript = result.bestTranscription.formattedString
 
                     // 만약 특정 단어가 포함되어 있다면? (감지 모드 테스트)
@@ -166,30 +146,21 @@ class SpeechManager: NSObject, ObservableObject {
                 print("[SpeechManager] recognitionTask error: \(error.localizedDescription)")
             }
 
-            if let result {
-                print("[SpeechManager] recognitionTask isFinal: \(result.isFinal)")
-            }
-
             if error != nil || result?.isFinal == true {
-                print("[SpeechManager] recognitionTask stopping recording")
                 self.stopRecording()
             }
         }
-        print("[SpeechManager] recognitionTask created: \(recognitionTask != nil)")
 
         // 마이크 입력 연결
         let recordingFormat = audioEngine.inputNode.outputFormat(forBus: 0)
-        print("[SpeechManager] input format sampleRate: \(recordingFormat.sampleRate), channels: \(recordingFormat.channelCount)")
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, _) in
             self.recognitionRequest?.append(buffer)
         }
-        print("[SpeechManager] inputNode tap installed")
 
         audioEngine.prepare()
         do {
             try audioEngine.start()
             isRecording = true
-            print("[SpeechManager] audioEngine.start success")
         } catch {
             transcript = "오디오 엔진 시작에 실패했습니다."
             print("[SpeechManager] audioEngine.start failed: \(error.localizedDescription)")

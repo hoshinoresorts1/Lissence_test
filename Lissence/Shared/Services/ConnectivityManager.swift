@@ -66,13 +66,10 @@ extension ConnectivityManager: WCSessionDelegate {
                 self.resetTimer?.invalidate()
                 self.receivedMessage = decoded
                 
-                print("📩 메시지 수신 성공: \(decoded.title)")
-                
                 // 5초 후 화면 초기화 로직
                 self.resetTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
                     DispatchQueue.main.async {
                         self?.receivedMessage = nil
-                        print("♻️ 아이폰 메시지 표시 기한 만료 - 대기 상태 전환")
                     }
                 }
             }
