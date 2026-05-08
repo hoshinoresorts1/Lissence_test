@@ -3,3 +3,7 @@ xcuserdata/
 *.xcuserstate
 xcschememanagement.plist
 DerivedData/
+build/
+*.moved-aside
+*.ipa
+*.dSYM
