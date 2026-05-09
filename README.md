@@ -1,11 +1,29 @@
 # 한국기술교육대학교 LISSENCE 팀
+
 청각장애인을 위한 촉각, 시각 변환 시스템
 
-- 역할:
-  - 앱
-  - CoreML
-  - SoundAnalysis
-  - BLE central
-  - detection logic
-  - UI
-  - watchOS
+## 역할
+
+이 저장소는 LISSENCE 프로젝트의 하드웨어 및 펌웨어 작업을 관리합니다.
+
+- ESP32 기반 BLE Peripheral
+- INMP441 I2S 마이크 입력 테스트
+- BLE 통신 프로토콜 문서화
+- 추후 진동 모터 / 모터 드라이버 제어
+- iPhone 앱과의 BLE 연동 테스트
+
+## 보드 종류
+
+현재 테스트에 사용한 보드:
+
+- ESP32-C3
+- ESP32-WROOM-32E
+
+기존 폴더명에는 `esp32-s3`가 남아 있지만, 현재 주요 테스트 보드는 ESP32-WROOM-32E입니다.
+
+## 현재 테스트 보드
+
+현재 기준 보드:
+
+```text
+ESP32-WROOM-32E
