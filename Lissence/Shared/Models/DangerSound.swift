@@ -47,8 +47,8 @@ enum DangerSound: String, CaseIterable {
         case "fire_alarm", "smoke_detector": return .fireAlarm
         case "shouting", "screaming", "yelling": return .shouting
         case "car_horn", "vehicle_horn": return .carHorn
-        case "knock": return .knock
-        case "speech", "conversation": return .speech
+        // 음성인식 기능은 유지하되, SoundAnalysis 기반 위험 감지에서는 제외한다.
+        case "knock", "speech", "conversation": return nil
         default: return nil
         }
     }

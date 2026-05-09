@@ -156,18 +156,21 @@ extension SoundClassifier: SNResultsObserving {
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
         
-        // 가장 신뢰도가 높은 결과 추출
-        if let classification = result.classifications.sorted(by: { $0.confidence > $1.confidence }).first {
-            // 임계값보다 높고, 정의된 위험 소리인 경우
-            if classification.confidence >= confidenceThreshold,
-               let soundType = DangerSound.from(identifier: classification.identifier) {
+        // 신뢰도 순으로 순회하며 앱에서 허용하는 위험 감지 항목을 채택합니다.
+        let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
+
+        for classification in sorted {
+            guard classification.confidence >= confidenceThreshold else { break }
+
+            if let soundType = DangerSound.from(identifier: classification.identifier) {
                 // ViewModel이 보고 있는 변수 업데이트
                 DispatchQueue.main.async { self.detectedSound = soundType }
-            } else {
-                // 감지된 소리가 없거나 신뢰도가 낮으면 unknown으로 초기화
-                DispatchQueue.main.async { self.detectedSound = .unknown }
+                return
             }
         }
+
+        // 감지된 소리가 없거나 앱에서 제외한 항목만 있으면 unknown으로 초기화
+        DispatchQueue.main.async { self.detectedSound = .unknown }
     }
 
     func request(_ request: SNRequest, didFailWithError error: Error) {
