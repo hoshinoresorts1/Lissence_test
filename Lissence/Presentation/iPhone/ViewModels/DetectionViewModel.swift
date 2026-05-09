@@ -54,8 +54,9 @@ class DetectionViewModel: ObservableObject {
         isVoiceOn.toggle()
         
         if isVoiceOn {
-            // 1. 음성 인식 시작 전, 소리 감지를 잠시 중단하여 충돌 방지
-            soundDetector.stopDetection()
+            // 실험 브랜치 전용: 음성인식 중에도 SoundAnalysis 위험 감지가 유지되는지 확인합니다.
+            // 기존 안정 구조로 되돌리려면 아래 호출을 복구합니다.
+            // soundDetector.stopDetection()
             
             // 2. 약간의 시간차를 두어 오디오 세션이 정리될 시간을 줍니다.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
