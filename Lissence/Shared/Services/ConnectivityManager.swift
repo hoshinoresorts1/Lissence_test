@@ -16,6 +16,9 @@ final class ConnectivityManager: NSObject, ObservableObject {
     
     /// 위험 감지상태의 자동 초기화를 위한 타이머 변수 추가
     private var resetTimer: Timer?
+
+    /// 같은 WatchConnectivity 전송 불가 사유가 반복 출력되지 않도록 저장하는 값입니다.
+    private var lastSendUnavailableReason: String?
     
     // MARK: - Initialization
     override private init() {
@@ -30,8 +33,14 @@ final class ConnectivityManager: NSObject, ObservableObject {
     // MARK: - Sending Logic (구조체 직접 전달)
     /// MessageData 규격을 사용하여 상대 기기로 데이터를 전송합니다
     func send(message: MessageData) {
-        guard WCSession.default.activationState == .activated else {
-            print("⚠️ 세션이 활성화되지 않아 전송할 수 없습니다.")
+        guard WCSession.isSupported() else {
+            logSendUnavailableOnce("WatchConnectivity를 지원하지 않아 전송하지 않습니다.")
+            return
+        }
+
+        let session = WCSession.default
+
+        guard canSendMessage(using: session) else {
             return
         }
 
@@ -41,10 +50,48 @@ final class ConnectivityManager: NSObject, ObservableObject {
         // 2. 딕셔너리에 담아서 전송
         let messageDict = ["payload": data]
         
-        WCSession.default.sendMessage(messageDict, replyHandler: nil) { error in
-            print("❌ 전송 실패: \(error.localizedDescription)")
+        session.sendMessage(messageDict, replyHandler: nil) { [weak self] error in
+            self?.logSendUnavailableOnce("WatchConnectivity 전송 실패: \(error.localizedDescription)")
         }
 
+    }
+
+    /// 현재 WCSession 상태가 즉시 메시지 전송 가능한 상태인지 확인합니다.
+    private func canSendMessage(using session: WCSession) -> Bool {
+        guard session.activationState == .activated else {
+            logSendUnavailableOnce("WCSession이 활성화되지 않아 전송하지 않습니다.")
+            return false
+        }
+
+        #if os(iOS)
+        guard session.isPaired else {
+            logSendUnavailableOnce("Apple Watch가 페어링되어 있지 않아 전송하지 않습니다.")
+            return false
+        }
+
+        guard session.isWatchAppInstalled else {
+            logSendUnavailableOnce("Watch 앱이 설치되어 있지 않아 전송하지 않습니다.")
+            return false
+        }
+        #endif
+
+        guard session.isReachable else {
+            logSendUnavailableOnce("상대 기기가 reachable 상태가 아니어서 전송하지 않습니다.")
+            return false
+        }
+
+        lastSendUnavailableReason = nil
+        return true
+    }
+
+    /// 같은 전송 불가 사유는 최초 1회만 출력합니다.
+    private func logSendUnavailableOnce(_ reason: String) {
+        guard lastSendUnavailableReason != reason else {
+            return
+        }
+
+        lastSendUnavailableReason = reason
+        print("⚠️ \(reason)")
     }
 }
 
