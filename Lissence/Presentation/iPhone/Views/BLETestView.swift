@@ -18,13 +18,17 @@ struct BLETestView: View {
         VStack(spacing: 24) {
             headerView
 
-            VStack(spacing: 16) {
-                statusSection
-                micLevelSection
-                messageSection
-                actionSection
+            ScrollView {
+                VStack(spacing: 16) {
+                    statusSection
+                    micLevelSection
+                    audioStreamSection
+                    messageSection
+                    actionSection
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 24)
 
             Spacer()
         }
@@ -83,6 +87,41 @@ struct BLETestView: View {
             BLEStatusRow(title: "상태", value: viewModel.micLevelStateText)
             BLEStatusRow(title: "RMS", value: viewModel.latestMicRMSText)
             BLEStatusRow(title: "Peak", value: viewModel.latestMicPeakText)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+
+    /// ESP32 PCM audio stream binary packet 재조립 통계를 표시하는 영역입니다.
+    private var audioStreamSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Audio Stream")
+                .font(.headline)
+
+            BLEStatusRow(title: "상태", value: viewModel.audioStreamingStateText)
+            BLEStatusRow(title: "Packets", value: "\(viewModel.audioPacketsReceived)")
+            BLEStatusRow(title: "Chunks", value: "\(viewModel.audioChunksReconstructed)")
+            BLEStatusRow(title: "Dropped", value: "\(viewModel.audioDroppedChunks)")
+            BLEStatusRow(title: "Latest chunk", value: "\(viewModel.latestAudioChunkSize) bytes")
+            BLEStatusRow(title: "Latest sequence", value: viewModel.latestAudioSequenceText)
+
+            HStack(spacing: 12) {
+                Button(action: viewModel.startAudioStream) {
+                    Label("Start Audio Stream", systemImage: "play.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(!viewModel.canControlAudioStream)
+
+                Button(action: viewModel.stopAudioStream) {
+                    Label("Stop", systemImage: "stop.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(!viewModel.canControlAudioStream)
+            }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)

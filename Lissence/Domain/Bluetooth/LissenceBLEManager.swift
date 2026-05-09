@@ -20,6 +20,9 @@ protocol LissenceBLEManagerDelegate: AnyObject {
     /// ESP32에서 notify 또는 read로 문자열 메시지를 받았을 때 호출됩니다.
     func bleManager(_ manager: LissenceBLEManager, didReceive message: LissenceBLEMessage)
 
+    /// ESP32에서 PCM audio stream binary packet을 받았을 때 호출됩니다.
+    func bleManager(_ manager: LissenceBLEManager, didReceiveAudioPacket data: Data)
+
     /// ESP32로 문자열 메시지 전송이 완료되었거나 전송 요청이 큐에 들어갔을 때 호출됩니다.
     func bleManager(_ manager: LissenceBLEManager, didSend message: LissenceBLEMessage)
 }
@@ -95,6 +98,16 @@ final class LissenceBLEManager: NSObject {
     /// ESP32로 햅틱 테스트 payload를 전송합니다.
     func writeWarningHapticCommand() {
         write(LissenceBLEConstants.warningHapticPayload)
+    }
+
+    /// ESP32 3초 PCM audio stream 시작 command를 전송합니다.
+    func writeStartAudioStreamCommand() {
+        write(#"{"type":"config","audio_stream":true}"#)
+    }
+
+    /// ESP32 PCM audio stream 중지 command를 전송합니다.
+    func writeStopAudioStreamCommand() {
+        write(#"{"type":"config","audio_stream":false}"#)
     }
 
     /// ESP32로 UTF-8 문자열을 전송합니다.
@@ -218,14 +231,42 @@ final class LissenceBLEManager: NSObject {
 
     // MARK: - 메시지 처리
 
-    /// Characteristic 값에서 UTF-8 문자열을 추출해 delegate로 전달합니다.
+    /// Characteristic 값에서 UTF-8 문자열 또는 PCM audio stream binary packet을 추출해 delegate로 전달합니다.
     private func handleReceivedValue(_ data: Data?) {
-        guard let data, let text = String(data: data, encoding: .utf8) else {
+        guard let data else {
+            notifyStatus("BLE 메시지 수신 데이터가 비어 있습니다.")
+            return
+        }
+
+        if isAudioStreamPacket(data) {
+            notifyReceivedAudioPacket(data)
+            return
+        }
+
+        guard let text = String(data: data, encoding: .utf8) else {
             notifyStatus("BLE 메시지 UTF-8 해석 실패")
             return
         }
 
         notifyReceivedMessage(text)
+    }
+
+    /// binary notify payload가 PCM audio stream packet 형식인지 검사합니다.
+    private func isAudioStreamPacket(_ data: Data) -> Bool {
+        guard data.count >= 7,
+              data[0] == 0xA1 else {
+            return false
+        }
+
+        let packetIndex = data[3]
+        let packetCount = data[4]
+        let payloadSize = Int(data[5]) | (Int(data[6]) << 8)
+
+        return packetCount > 0 &&
+            packetIndex < packetCount &&
+            payloadSize > 0 &&
+            payloadSize <= 120 &&
+            data.count == 7 + payloadSize
     }
 
     /// Characteristic 속성에 맞는 write 방식을 선택합니다.
@@ -291,6 +332,11 @@ final class LissenceBLEManager: NSObject {
     private func notifyReceivedMessage(_ text: String) {
         let message = LissenceBLEMessage(text: text)
         notifyOnMain { $0.bleManager(self, didReceive: message) }
+    }
+
+    /// 수신한 PCM audio stream binary packet을 전달합니다.
+    private func notifyReceivedAudioPacket(_ data: Data) {
+        notifyOnMain { $0.bleManager(self, didReceiveAudioPacket: data) }
     }
 
     /// 송신 메시지를 전달합니다.
