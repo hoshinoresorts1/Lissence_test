@@ -2,10 +2,10 @@
 청각장애인을 위한 촉각, 시각 변환 시스템
 
 - 역할:
-* 앱
-* CoreML
-* SoundAnalysis
-* BLE central
-* detection logic
-* UI
-* watchOS
+  - 앱
+  - CoreML
+  - SoundAnalysis
+  - BLE central
+  - detection logic
+  - UI
+  - watchOS
