@@ -20,6 +20,7 @@ struct BLETestView: View {
 
             VStack(spacing: 16) {
                 statusSection
+                micLevelSection
                 messageSection
                 actionSection
             }
@@ -66,6 +67,22 @@ struct BLETestView: View {
             BLEStatusRow(title: "상태", value: viewModel.statusText)
             BLEStatusRow(title: "장치", value: viewModel.discoveredDeviceName)
             BLEStatusRow(title: "연결", value: viewModel.isConnected ? "연결됨" : "연결 안 됨")
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+
+    /// ESP32에서 notify로 받은 최신 INMP441 RMS/Peak 값을 표시하는 영역입니다.
+    private var micLevelSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("마이크 레벨")
+                .font(.headline)
+
+            BLEStatusRow(title: "상태", value: viewModel.micLevelStateText)
+            BLEStatusRow(title: "RMS", value: viewModel.latestMicRMSText)
+            BLEStatusRow(title: "Peak", value: viewModel.latestMicPeakText)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)

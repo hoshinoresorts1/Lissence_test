@@ -25,9 +25,28 @@ final class BLETestViewModel: ObservableObject {
     /// 최근 ESP32로 보낸 문자열 메시지입니다.
     @Published var lastSentMessage = "-"
 
+    /// ESP32에서 최근 수신한 INMP441 RMS 값입니다.
+    @Published var latestMicRMS: Int?
+
+    /// ESP32에서 최근 수신한 INMP441 peak 값입니다.
+    @Published var latestMicPeak: Int?
+
+    /// 최근 RMS 값 기준의 간단한 마이크 입력 상태입니다.
+    @Published var micLevelStateText = "-"
+
     /// 테스트 write 버튼 활성화 여부입니다.
     var canSendTestCommand: Bool {
         isConnected
+    }
+
+    /// 화면에 표시할 최근 RMS 값 문자열입니다.
+    var latestMicRMSText: String {
+        latestMicRMS.map(String.init) ?? "-"
+    }
+
+    /// 화면에 표시할 최근 peak 값 문자열입니다.
+    var latestMicPeakText: String {
+        latestMicPeak.map(String.init) ?? "-"
     }
 
     /// BLE 통신을 담당하는 서비스 객체입니다.
@@ -58,6 +77,35 @@ final class BLETestViewModel: ObservableObject {
     func sendWarningHapticCommand() {
         bleManager.writeWarningHapticCommand()
     }
+
+    // MARK: - 수신 메시지 처리
+
+    /// BLE notify 문자열에서 mic_level payload를 파싱해 마이크 레벨 상태를 갱신합니다.
+    private func updateMicLevelIfNeeded(from text: String) {
+        guard let data = text.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              payload["type"] as? String == "mic_level",
+              let rms = payload["rms"] as? Int,
+              let peak = payload["peak"] as? Int else {
+            return
+        }
+
+        latestMicRMS = rms
+        latestMicPeak = peak
+        micLevelStateText = micLevelState(for: rms)
+    }
+
+    /// RMS 값 기준으로 BLE 테스트 화면에 표시할 간단한 상태값을 반환합니다.
+    private func micLevelState(for rms: Int) -> String {
+        switch rms {
+        case ..<8_000:
+            return "quiet"
+        case 8_000..<50_000:
+            return "active"
+        default:
+            return "loud"
+        }
+    }
 }
 
 // MARK: - LissenceBLEManagerDelegate
@@ -86,6 +134,7 @@ extension BLETestViewModel: LissenceBLEManagerDelegate {
     /// ESP32에서 받은 notify/read 메시지를 ViewModel 상태로 반영합니다.
     func bleManager(_ manager: LissenceBLEManager, didReceive message: LissenceBLEMessage) {
         lastReceivedMessage = message.text
+        updateMicLevelIfNeeded(from: message.text)
     }
 
     /// ESP32로 보낸 메시지를 ViewModel 상태로 반영합니다.
