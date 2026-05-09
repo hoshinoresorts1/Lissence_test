@@ -19,7 +19,9 @@ class DetectionViewModel: ObservableObject {
             // Sheet를 손으로 내리거나 X 버튼을 눌러서 false가 되었을 때도 대응
             if oldValue == true && isVoiceOn == false {
                 speechManager.stopRecording()
-                soundDetector.startDetection()
+                if !soundDetector.isRunning {
+                    soundDetector.startDetection()
+                }
             }
         }
     }
@@ -65,7 +67,9 @@ class DetectionViewModel: ObservableObject {
         } else {
             // 3. 음성 인식 종료 후 다시 소리 감지 재개
             speechManager.stopRecording()
-            soundDetector.startDetection()
+            if !soundDetector.isRunning {
+                soundDetector.startDetection()
+            }
         }
     }
 

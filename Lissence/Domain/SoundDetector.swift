@@ -11,20 +11,44 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private let audioEngine = AVAudioEngine()
     private var analyzer: SNAudioStreamAnalyzer?
     private let analysisQueue = DispatchQueue(label: "com.Lissence.AnalysisQueue")
+    private var isStartingDetection = false
     
     // UI에서 현재 어떤 소리가 들리는지 보여줄 변수
     @Published var statusText: String = "주변 소리 분석 중..."
     @Published var lastDetectedSound: String = ""
     @Published var isDetecting: Bool = false
 
+    /// 소리 감지 엔진이 실행 중이거나 시작 준비 중인지 나타냅니다.
+    var isRunning: Bool {
+        isStartingDetection || audioEngine.isRunning || isDetecting
+    }
+
     func startDetection() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.startDetection()
+            }
+            return
+        }
+
+        print("SoundDetector startDetection called")
+
+        guard !isRunning else {
+            print("SoundDetector already running, skip start")
+            return
+        }
+
+        isStartingDetection = true
+
         let audioSession = AVAudioSession.sharedInstance()
         do {
             // 모드를 .default 또는 .videoRecording 등으로 변경하여 더 넓은 대역폭 확보
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true)
         } catch {
-            print("오디오 세션 설정 실패")
+            isStartingDetection = false
+            print("오디오 세션 설정 실패: \(error.localizedDescription)")
+            return
         }
 
         // 2. 분석기(Analyzer) 설정
@@ -45,16 +69,31 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
             }
             
             try audioEngine.start()
-            DispatchQueue.main.async { self.isDetecting = true }
+            isStartingDetection = false
+            isDetecting = true
         } catch {
+            isStartingDetection = false
+            analyzer = nil
             print("감지 시작 실패: \(error)")
         }
     }
 
     func stopDetection() {
-        audioEngine.stop()
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.stopDetection()
+            }
+            return
+        }
+
+        print("SoundDetector stopDetection called")
+
         audioEngine.inputNode.removeTap(onBus: 0)
+        audioEngine.stop()
+        audioEngine.reset()
+        analyzer?.removeAllRequests()
         analyzer = nil
+        isStartingDetection = false
         isDetecting = false
     }
 
@@ -87,4 +126,3 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         ConnectivityManager.shared.send(message: message)
     }
 }
-
