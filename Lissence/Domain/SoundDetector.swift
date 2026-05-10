@@ -16,6 +16,14 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     // UI에서 현재 어떤 소리가 들리는지 보여줄 변수
     @Published var statusText: String = "주변 소리 분석 중..."
     @Published var lastDetectedSound: String = ""
+    /// 마지막으로 위험 소리로 채택된 DangerSound입니다.
+    @Published var lastDetectedDangerSound: DangerSound?
+    /// 마지막으로 위험 소리로 채택된 분류 결과의 confidence입니다.
+    @Published var lastDetectionConfidence: Double?
+    /// SoundAnalysis가 마지막으로 반환한 최상위 classification identifier입니다.
+    @Published var lastAnalyzerClassificationIdentifier: String = "-"
+    /// SoundAnalysis가 마지막으로 반환한 최상위 classification confidence입니다.
+    @Published var lastAnalyzerClassificationConfidence: Double?
     @Published var isDetecting: Bool = false
 
     /// 소리 감지 엔진이 실행 중이거나 시작 준비 중인지 나타냅니다.
@@ -39,6 +47,11 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         }
 
         isStartingDetection = true
+        lastDetectedSound = ""
+        lastDetectedDangerSound = nil
+        lastDetectionConfidence = nil
+        lastAnalyzerClassificationIdentifier = "-"
+        lastAnalyzerClassificationConfidence = nil
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -60,6 +73,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
             // 3. Apple 제공 시스템 분류기 설정 (.version1 사용)
             let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
             try analyzer?.add(request, withObserver: self)
+            print("[SoundDetector] analyzer request started")
             
             // 4. 마이크 입력을 분석기로 전달 (Tap 설치)
             inputNode.installTap(onBus: 0, bufferSize: 8000, format: recordingFormat) { [weak self] buffer, time in
@@ -71,6 +85,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
             try audioEngine.start()
             isStartingDetection = false
             isDetecting = true
+            print("[SoundDetector] audio engine started")
         } catch {
             isStartingDetection = false
             analyzer = nil
@@ -99,10 +114,25 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
 
     /// 소리 분석 처리 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
+        print("[SoundDetector] didProduce result")
         guard let result = result as? SNClassificationResult else { return }
         
         // 1. 신뢰도 순 정렬 및 임계값 체크
         let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
+
+        if let topClassification = sorted.first {
+            let candidates = sorted
+                .prefix(3)
+                .map { "\($0.identifier)=\(String(format: "%.3f", $0.confidence))" }
+                .joined(separator: ", ")
+            print("[SoundDetector] classification candidates: \(candidates)")
+
+            DispatchQueue.main.async {
+                self.lastAnalyzerClassificationIdentifier = topClassification.identifier
+                self.lastAnalyzerClassificationConfidence = topClassification.confidence
+                print("[SoundDetector] lastAnalyzerLabel updated: \(topClassification.identifier), confidence=\(topClassification.confidence)")
+            }
+        }
         
         for classification in sorted {
             guard classification.confidence > 0.6 else { break }
@@ -112,11 +142,23 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                 // 3. 개별 인자를 넘기지 않고 sound 객체 하나만 넘김
                 DispatchQueue.main.async {
                     self.lastDetectedSound = sound.label
+                    self.lastDetectedDangerSound = sound
+                    self.lastDetectionConfidence = classification.confidence
                     self.sendDangerAlert(sound: sound)
                 }
                 return
             }
         }
+    }
+
+    /// 소리 분석 실패를 로그로 남깁니다.
+    func request(_ request: SNRequest, didFailWithError error: Error) {
+        print("[SoundDetector] didFail error=\(error.localizedDescription)")
+    }
+
+    /// 소리 분석 요청 완료를 로그로 남깁니다.
+    func requestDidComplete(_ request: SNRequest) {
+        print("[SoundDetector] requestDidComplete")
     }
 
     private func sendDangerAlert(sound: DangerSound) {

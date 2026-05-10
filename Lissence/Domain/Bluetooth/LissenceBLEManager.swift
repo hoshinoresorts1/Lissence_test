@@ -3,6 +3,12 @@
 import CoreBluetooth
 import Foundation
 
+/// ESP32 PCM audio stream binary packet 규격입니다.
+private enum AudioStreamPacketFormat {
+    /// ESP32 firmware의 audio packet payload 최대 byte 크기입니다.
+    static let maxAudioPacketPayloadSize = 160
+}
+
 /// BLE manager가 ViewModel에 전달하는 상태 변경 이벤트입니다.
 protocol LissenceBLEManagerDelegate: AnyObject {
     /// Bluetooth 전원 또는 권한 상태 문구가 변경되었을 때 호출됩니다.
@@ -30,6 +36,9 @@ protocol LissenceBLEManagerDelegate: AnyObject {
 /// Lissence ESP32 BLE Peripheral과 통신하는 CoreBluetooth 서비스 객체입니다.
 final class LissenceBLEManager: NSObject {
     // MARK: - 속성
+
+    /// BLE 테스트와 앱 내부 write 경로에서 공유하는 ESP32 BLE manager입니다.
+    static let shared = LissenceBLEManager()
 
     /// BLE 상태 변경을 받을 delegate입니다.
     weak var delegate: LissenceBLEManagerDelegate?
@@ -98,6 +107,12 @@ final class LissenceBLEManager: NSObject {
     /// ESP32로 햅틱 테스트 payload를 전송합니다.
     func writeWarningHapticCommand() {
         write(LissenceBLEConstants.warningHapticPayload)
+    }
+
+    /// ESP32로 지정된 햅틱 pattern 실행 command를 전송합니다.
+    func writeHapticPattern(_ pattern: String) {
+        let payload = #"{"type":"haptic","pattern":"\#(pattern)"}"#
+        write(payload)
     }
 
     /// ESP32 3초 PCM audio stream 시작 command를 전송합니다.
@@ -265,7 +280,7 @@ final class LissenceBLEManager: NSObject {
         return packetCount > 0 &&
             packetIndex < packetCount &&
             payloadSize > 0 &&
-            payloadSize <= 120 &&
+            payloadSize <= AudioStreamPacketFormat.maxAudioPacketPayloadSize &&
             data.count == 7 + payloadSize
     }
 

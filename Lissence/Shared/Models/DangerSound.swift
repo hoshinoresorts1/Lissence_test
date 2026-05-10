@@ -39,16 +39,37 @@ enum DangerSound: String, CaseIterable {
         default: return true
         }
     }
+
+    /// ESP32 DRV2605L 햅틱 드라이버로 전송할 BLE pattern 식별자입니다.
+    var hapticPattern: String? {
+        switch self {
+        case .siren:
+            return "siren"
+        case .fireAlarm:
+            return "fireAlarm"
+        case .carHorn:
+            return "carHorn"
+        case .shouting, .knock, .speech, .unknown:
+            return nil
+        }
+    }
     
     // 4. Apple SoundAnalysis ID와 매핑
     static func from(identifier: String) -> DangerSound? {
         switch identifier {
         case "siren", "emergency_vehicle": return .siren
         case "fire_alarm", "smoke_detector": return .fireAlarm
-        case "shouting", "screaming", "yelling": return .shouting
         case "car_horn", "vehicle_horn": return .carHorn
-        // 음성인식 기능은 유지하되, SoundAnalysis 기반 위험 감지에서는 제외한다.
-        case "knock", "speech", "conversation": return nil
+        // 음성인식 기능과 사람 소리 관련 기능은 유지하되, SoundAnalysis 기반 위험 감지에서는 제외한다.
+        case "knock",
+             "speech",
+             "conversation",
+             "shouting",
+             "screaming",
+             "yelling",
+             "crying_sobbing",
+             "baby_crying":
+            return nil
         default: return nil
         }
     }
