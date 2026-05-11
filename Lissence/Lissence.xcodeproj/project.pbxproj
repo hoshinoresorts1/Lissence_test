@@ -24,6 +24,7 @@
 		C34B94B72F76475600ADDF8E /* MessageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94B52F76475600ADDF8E /* MessageData.swift */; };
 		C34B94BF2F764D8600ADDF8E /* DetectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */; };
 		C34B94C42F764DEC00ADDF8E /* WatchDetectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94C32F764DEC00ADDF8E /* WatchDetectionViewModel.swift */; };
+		C3A600012FA7000000000001 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = C3A600002FA7000000000001 /* RiveRuntime */; };
 		C3B57C5C2F5EDD12002C9D36 /* Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C3B57C522F5EDD10002C9D36 /* Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
 		C3B57C632F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B57C612F5EDD28002C9D36 /* ConnectivityManager.swift */; };
@@ -35,6 +36,9 @@
 		C4A100162FA2000000000001 /* MusicAudioWindowRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */; };
 		C4A100172FA2000000000001 /* MusicMoodAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */; };
 		C4A100182FA2000000000001 /* MusicViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100082FA2000000000001 /* MusicViewModel.swift */; };
+		C4A100192FA6000000000001 /* MusicAudioLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A100092FA6000000000001 /* MusicAudioLevel.swift */; };
+		C4A1001A2FA6000000000001 /* MusicHapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A1000A2FA6000000000001 /* MusicHapticController.swift */; };
+		C4A1001B2FA6000000000001 /* MusicMoodParticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A1000B2FA6000000000001 /* MusicMoodParticleView.swift */; };
 		C5B100112FA5000000000001 /* LissenceBLEConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100012FA5000000000001 /* LissenceBLEConstants.swift */; };
 		C5B100122FA5000000000001 /* LissenceBLEMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100022FA5000000000001 /* LissenceBLEMessage.swift */; };
 		C5B100132FA5000000000001 /* LissenceBLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100032FA5000000000001 /* LissenceBLEManager.swift */; };
@@ -93,6 +97,9 @@
 		C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAudioWindowRecorder.swift; sourceTree = "<group>"; };
 		C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMoodAnalyzer.swift; sourceTree = "<group>"; };
 		C4A100082FA2000000000001 /* MusicViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicViewModel.swift; sourceTree = "<group>"; };
+		C4A100092FA6000000000001 /* MusicAudioLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAudioLevel.swift; sourceTree = "<group>"; };
+		C4A1000A2FA6000000000001 /* MusicHapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicHapticController.swift; sourceTree = "<group>"; };
+		C4A1000B2FA6000000000001 /* MusicMoodParticleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicMoodParticleView.swift; sourceTree = "<group>"; };
 		C5B100012FA5000000000001 /* LissenceBLEConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEConstants.swift; sourceTree = "<group>"; };
 		C5B100022FA5000000000001 /* LissenceBLEMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEMessage.swift; sourceTree = "<group>"; };
 		C5B100032FA5000000000001 /* LissenceBLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEManager.swift; sourceTree = "<group>"; };
@@ -131,6 +138,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3A600012FA7000000000001 /* RiveRuntime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,6 +236,7 @@
 				C34B94972F75072600ADDF8E /* MainHomeView.swift */,
 				C34B94942F75072600ADDF8E /* DetectionDetailView.swift */,
 				C34B94982F75072600ADDF8E /* MusicDetailView.swift */,
+				C4A1000B2FA6000000000001 /* MusicMoodParticleView.swift */,
 				C5B100052FA5000000000001 /* BLETestView.swift */,
 				C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */,
 			);
@@ -281,6 +290,8 @@
 				C4A100052FA2000000000001 /* TrainingStats.swift */,
 				C4A100062FA2000000000001 /* MusicAudioWindowRecorder.swift */,
 				C4A100072FA2000000000001 /* MusicMoodAnalyzer.swift */,
+				C4A100092FA6000000000001 /* MusicAudioLevel.swift */,
+				C4A1000A2FA6000000000001 /* MusicHapticController.swift */,
 			);
 			path = Music;
 			sourceTree = "<group>";
@@ -317,6 +328,7 @@
 			);
 			name = Lissence;
 			packageProductDependencies = (
+				C3A600002FA7000000000001 /* RiveRuntime */,
 			);
 			productName = Lissence;
 			productReference = 49130A712F44376B00B10708 /* Lissence.app */;
@@ -371,6 +383,9 @@
 			);
 			mainGroup = 49130A682F44376B00B10708;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C3A600032FA7000000000001 /* XCRemoteSwiftPackageReference "rive-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49130A722F44376B00B10708 /* Products */;
 			projectDirPath = "";
@@ -417,13 +432,16 @@
 				C4A100112FA2000000000001 /* MusicMood.swift in Sources */,
 				C34B94B62F76475600ADDF8E /* MessageData.swift in Sources */,
 				C4A100162FA2000000000001 /* MusicAudioWindowRecorder.swift in Sources */,
+				C4A100192FA6000000000001 /* MusicAudioLevel.swift in Sources */,
 				C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */,
 				C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */,
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
 				C4A100132FA2000000000001 /* MusicMoodModelClassifier.swift in Sources */,
 				C5B100142FA5000000000001 /* BLETestViewModel.swift in Sources */,
+				C4A1001B2FA6000000000001 /* MusicMoodParticleView.swift in Sources */,
 				C4A100182FA2000000000001 /* MusicViewModel.swift in Sources */,
 				C4A100172FA2000000000001 /* MusicMoodAnalyzer.swift in Sources */,
+				C4A1001A2FA6000000000001 /* MusicHapticController.swift in Sources */,
 				C5B100112FA5000000000001 /* LissenceBLEConstants.swift in Sources */,
 				C5B100132FA5000000000001 /* LissenceBLEManager.swift in Sources */,
 				C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
@@ -757,6 +775,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C3A600032FA7000000000001 /* XCRemoteSwiftPackageReference "rive-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rive-app/rive-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.20.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C3A600002FA7000000000001 /* RiveRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3A600032FA7000000000001 /* XCRemoteSwiftPackageReference "rive-ios" */;
+			productName = RiveRuntime;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 49130A692F44376B00B10708 /* Project object */;
 }

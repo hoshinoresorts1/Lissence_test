@@ -61,6 +61,20 @@ enum MusicMood: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Rive state machine의 mood 입력값입니다.
+    var riveValue: Double {
+        switch self {
+        case .happy:
+            return 0.0
+        case .angry:
+            return 1.0
+        case .sad:
+            return 2.0
+        case .relaxed:
+            return 3.0
+        }
+    }
+
     /// CoreML 라벨을 앱 도메인 무드로 변환합니다.
     init?(modelLabel: String) {
         guard let mood = Self.allCases.first(where: { $0.modelLabel == modelLabel }) else {

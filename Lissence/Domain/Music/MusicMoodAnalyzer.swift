@@ -10,6 +10,9 @@ protocol MusicMoodAnalyzerDelegate: AnyObject {
     /// 새로운 무드 분석 결과가 도출되었을 때 호출됩니다.
     func musicMoodAnalyzer(_ analyzer: MusicMoodAnalyzer, didUpdatePrediction prediction: MusicMoodPrediction)
 
+    /// 실시간 오디오 레벨이 갱신되었을 때 호출됩니다.
+    func musicMoodAnalyzer(_ analyzer: MusicMoodAnalyzer, didUpdateAudioLevel level: MusicAudioLevel)
+
     /// 분석 중 복구 불가능한 오류가 발생했을 때 호출됩니다.
     func musicMoodAnalyzer(_ analyzer: MusicMoodAnalyzer, didFail error: Error)
 }
@@ -84,6 +87,13 @@ final class MusicMoodAnalyzer {
         recorder.start(
             windowSeconds: windowSeconds,
             stepSeconds: stepSeconds,
+            onLevel: { [weak self] level in
+                guard let self, self.isRunning, self.runId == currentRunId else {
+                    return
+                }
+
+                self.delegate?.musicMoodAnalyzer(self, didUpdateAudioLevel: level)
+            },
             onWindow: { [weak self] samples, sampleRate in
                 self?.analyzeWindow(samples: samples, sampleRate: sampleRate, runId: currentRunId)
             },
