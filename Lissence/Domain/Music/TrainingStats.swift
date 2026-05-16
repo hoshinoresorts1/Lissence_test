@@ -10,6 +10,12 @@ struct TrainingStats {
     /// 스펙트로그램, MFCC, Mel 채널의 표준편차입니다.
     let stds: [Float]
 
+    /// 학습 JSON에 기록된 feature 채널 순서입니다.
+    let featureOrder: [String]
+
+    /// 학습 JSON에 기록된 class label 순서입니다.
+    let labelNames: [String]
+
     // MARK: - 로드
 
     /// 앱 번들에서 학습 통계 json을 읽어옵니다.
@@ -17,15 +23,26 @@ struct TrainingStats {
         guard let url = Bundle.main.url(forResource: "train_stats_segments_improved", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return TrainingStats(means: [0, 0, 0], stds: [1, 1, 1])
+            return TrainingStats(
+                means: [0, 0, 0],
+                stds: [1, 1, 1],
+                featureOrder: ["spec", "mfcc", "mel"],
+                labelNames: ["Q1", "Q2", "Q3", "Q4"]
+            )
         }
 
         let means = readArray(object, keys: ["channel_mean", "channel_means", "means", "mean"]) ?? [0, 0, 0]
         let stds = readArray(object, keys: ["channel_std", "channel_stds", "stds", "std"]) ?? [1, 1, 1]
+        let featureOrder = readStringArray(object, keys: ["feature_order", "feature_names", "channels"])
+            ?? ["spec", "mfcc", "mel"]
+        let labelNames = readStringArray(object, keys: ["label_names", "labels", "class_labels"])
+            ?? ["Q1", "Q2", "Q3", "Q4"]
 
         return TrainingStats(
             means: fit3(means, fallback: [0, 0, 0]),
-            stds: fit3(stds, fallback: [1, 1, 1])
+            stds: fit3(stds, fallback: [1, 1, 1]),
+            featureOrder: Array(featureOrder.prefix(3)),
+            labelNames: labelNames
         )
     }
 
@@ -44,6 +61,17 @@ struct TrainingStats {
 
             if let array = object[key] as? [NSNumber] {
                 return array.map { $0.floatValue }
+            }
+        }
+
+        return nil
+    }
+
+    /// 여러 가능한 key 이름 중 첫 번째 문자열 배열 값을 읽습니다.
+    private static func readStringArray(_ object: [String: Any], keys: [String]) -> [String]? {
+        for key in keys {
+            if let array = object[key] as? [String], !array.isEmpty {
+                return array
             }
         }
 

@@ -38,6 +38,9 @@ final class AudioFeatureExtractor {
     /// 채널별 정규화 표준편차입니다.
     private let stds: [Float]
 
+    /// feature 채널 순서입니다.
+    private let featureOrder: [String]
+
     // MARK: - 초기화
 
     /// 학습 통계를 로드해 feature extractor를 준비합니다.
@@ -45,6 +48,9 @@ final class AudioFeatureExtractor {
         let stats = TrainingStats.load()
         means = stats.means
         stds = stats.stds
+        featureOrder = stats.featureOrder
+
+        debugLog("stats means=\(means), stds=\(stds), featureOrder=\(featureOrder), labels=\(stats.labelNames)")
     }
 
     // MARK: - 입력 생성
@@ -63,23 +69,39 @@ final class AudioFeatureExtractor {
         let spec128 = resizeArea(spec, newRows: targetHeight, newCols: targetWidth)
         let mfcc128 = resizeArea(mfcc, newRows: targetHeight, newCols: targetWidth)
         let mel128 = resizeArea(mel, newRows: targetHeight, newCols: targetWidth)
+        let featureMaps = [
+            "spec": spec128,
+            "spectrogram": spec128,
+            "mfcc": mfcc128,
+            "mel": mel128,
+            "mel_spectrogram": mel128
+        ]
 
         let array = try MLMultiArray(
             shape: [1, NSNumber(value: targetHeight), NSNumber(value: targetWidth), 3],
             dataType: .float32
         )
 
+        var preview: [Float] = []
+
         for row in 0..<targetHeight {
             for column in 0..<targetWidth {
-                let values = [spec128[row][column], mfcc128[row][column], mel128[row][column]]
-
                 for channel in 0..<3 {
-                    let value = (values[channel] - means[channel]) / max(stds[channel], 1e-8)
+                    let key = channel < featureOrder.count ? featureOrder[channel].lowercased() : ""
+                    let feature = featureMaps[key] ?? [spec128, mfcc128, mel128][channel]
+                    let value = (feature[row][column] - means[channel]) / max(stds[channel], 1e-8)
                     let index = row * targetWidth * 3 + column * 3 + channel
                     array[index] = NSNumber(value: value)
+
+                    if preview.count < 8 {
+                        preview.append(value)
+                    }
                 }
             }
         }
+
+        debugLog("extracted feature vector size=\(array.count), shape=\(array.shape)")
+        debugLog("normalized feature preview=\(preview.map { String(format: "%.4f", $0) }.joined(separator: ", "))")
 
         return array
     }
@@ -386,5 +408,12 @@ final class AudioFeatureExtractor {
     /// Mel을 Hz로 변환합니다.
     private func melToHz(_ mel: Float) -> Float {
         700.0 * (pow(10.0, mel / 2595.0) - 1.0)
+    }
+
+    /// Debug 빌드에서만 음악모드 feature 로그를 출력합니다.
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print("[MusicAudioFeatureExtractor] \(message)")
+        #endif
     }
 }

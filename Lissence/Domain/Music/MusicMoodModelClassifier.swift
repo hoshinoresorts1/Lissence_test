@@ -11,10 +11,13 @@ final class MusicMoodModelClassifier {
     private let model: MLModel
 
     /// 모델 입력 feature 이름입니다.
-    private let inputName = "input_layer"
+    private let inputName: String
 
     /// MultiArray 출력만 존재할 때 사용할 fallback 라벨 순서입니다.
-    private let fallbackLabels = ["Q1", "Q2", "Q3", "Q4"]
+    private let fallbackLabels: [String]
+
+    /// 모델이 반환하는 predicted label 출력 이름입니다.
+    private let classLabelName: String
 
     // MARK: - 초기화
 
@@ -23,11 +26,12 @@ final class MusicMoodModelClassifier {
         let configuration = MLModelConfiguration()
         configuration.computeUnits = .all
 
+        let loadedModel: MLModel
         if let compiledURL = Bundle.main.url(forResource: "MusicMoodClassifier", withExtension: "mlmodelc") {
-            model = try MLModel(contentsOf: compiledURL, configuration: configuration)
+            loadedModel = try MLModel(contentsOf: compiledURL, configuration: configuration)
         } else if let packageURL = Bundle.main.url(forResource: "MusicMoodClassifier", withExtension: "mlpackage") {
             let compiledURL = try MLModel.compileModel(at: packageURL)
-            model = try MLModel(contentsOf: compiledURL, configuration: configuration)
+            loadedModel = try MLModel(contentsOf: compiledURL, configuration: configuration)
         } else {
             throw NSError(
                 domain: "MusicMoodModelClassifier",
@@ -35,6 +39,14 @@ final class MusicMoodModelClassifier {
                 userInfo: [NSLocalizedDescriptionKey: "MusicMoodClassifier 모델을 찾지 못했습니다."]
             )
         }
+
+        model = loadedModel
+        inputName = Self.resolveInputName(from: loadedModel)
+        fallbackLabels = Self.resolveFallbackLabels()
+        classLabelName = loadedModel.modelDescription.predictedFeatureName ?? "classLabel"
+
+        try Self.validateModelDescription(loadedModel, inputName: inputName)
+        debugLog(Self.modelSummary(loadedModel, inputName: inputName, labels: fallbackLabels))
     }
 
     // MARK: - 예측
@@ -47,14 +59,18 @@ final class MusicMoodModelClassifier {
 
         let output = try model.prediction(from: provider)
 
-        if let label = output.featureValue(for: "classLabel")?.stringValue {
-            return MusicMoodClassifierResult(
+        if let label = output.featureValue(for: classLabelName)?.stringValue
+            ?? output.featureValue(for: "classLabel")?.stringValue {
+            let result = MusicMoodClassifierResult(
                 label: label,
                 probabilities: readProbabilityDictionary(output) ?? [:]
             )
+            debugLog("predicted label=\(result.label), confidence=\(Self.confidence(from: result.probabilities))")
+            return result
         }
 
         if let result = readMultiArrayOutput(output) {
+            debugLog("predicted label=\(result.label), confidence=\(Self.confidence(from: result.probabilities))")
             return result
         }
 
@@ -127,5 +143,70 @@ final class MusicMoodModelClassifier {
         }
 
         return nil
+    }
+
+    /// 모델 description에서 첫 번째 MultiArray 입력 이름을 찾습니다.
+    private static func resolveInputName(from model: MLModel) -> String {
+        if let name = model.modelDescription.inputDescriptionsByName.first(where: { $0.value.type == .multiArray })?.key {
+            return name
+        }
+
+        return "input_layer"
+    }
+
+    /// 학습 stats의 label 순서를 fallback 라벨로 사용합니다.
+    private static func resolveFallbackLabels() -> [String] {
+        let labels = TrainingStats.load().labelNames
+        return labels.count >= 4 ? Array(labels.prefix(4)) : ["Q1", "Q2", "Q3", "Q4"]
+    }
+
+    /// 새 모델이 음악모드 extractor 출력과 호환되는지 확인합니다.
+    private static func validateModelDescription(_ model: MLModel, inputName: String) throws {
+        guard let input = model.modelDescription.inputDescriptionsByName[inputName],
+              input.type == .multiArray,
+              let shape = input.multiArrayConstraint?.shape.map({ $0.intValue }) else {
+            throw NSError(
+                domain: "MusicMoodModelClassifier",
+                code: 3,
+                userInfo: [NSLocalizedDescriptionKey: "MusicMoodClassifier 입력 MultiArray description을 찾지 못했습니다."]
+            )
+        }
+
+        let expectedShape = [1, 128, 128, 3]
+        guard shape == expectedShape else {
+            throw NSError(
+                domain: "MusicMoodModelClassifier",
+                code: 4,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "MusicMoodClassifier 입력 shape mismatch: expected \(expectedShape), actual \(shape)"
+                ]
+            )
+        }
+    }
+
+    /// 모델 구조 요약 로그를 생성합니다.
+    private static func modelSummary(_ model: MLModel, inputName: String, labels: [String]) -> String {
+        let description = model.modelDescription
+        let input = description.inputDescriptionsByName[inputName]
+        let inputShape = input?.multiArrayConstraint?.shape.map { $0.stringValue }.joined(separator: "x") ?? "unknown"
+        let outputs = description.outputDescriptionsByName.keys.sorted().joined(separator: ", ")
+        let metadata = description.metadata
+        let shortDescription = metadata[.description] as? String ?? ""
+        let author = metadata[.author] as? String ?? ""
+        let version = metadata[.versionString] as? String ?? ""
+
+        return "model input=\(inputName), shape=\(inputShape), outputs=\(outputs), predictedLabel=\(description.predictedFeatureName ?? "nil"), predictedProbs=\(description.predictedProbabilitiesName ?? "nil"), labels=\(labels), description=\(shortDescription), author=\(author), version=\(version)"
+    }
+
+    /// 확률 딕셔너리에서 가장 큰 confidence를 계산합니다.
+    private static func confidence(from probabilities: [String: Double]) -> Double {
+        probabilities.values.max() ?? 0.0
+    }
+
+    /// Debug 빌드에서만 음악모드 CoreML 로그를 출력합니다.
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print("[MusicMoodModelClassifier] \(message)")
+        #endif
     }
 }

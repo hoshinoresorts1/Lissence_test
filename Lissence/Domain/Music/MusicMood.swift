@@ -77,7 +77,43 @@ enum MusicMood: String, CaseIterable, Identifiable {
 
     /// CoreML 라벨을 앱 도메인 무드로 변환합니다.
     init?(modelLabel: String) {
-        guard let mood = Self.allCases.first(where: { $0.modelLabel == modelLabel }) else {
+        let normalized = modelLabel
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "-", with: "_")
+            .replacingOccurrences(of: " ", with: "_")
+
+        let aliases: [String: MusicMood] = [
+            "q1": .happy,
+            "0": .happy,
+            "happy": .happy,
+            "happiness": .happy,
+            "joy": .happy,
+            "joyful": .happy,
+            "excited": .happy,
+            "q2": .angry,
+            "1": .angry,
+            "angry": .angry,
+            "anger": .angry,
+            "mad": .angry,
+            "aggressive": .angry,
+            "tense": .angry,
+            "q3": .sad,
+            "2": .sad,
+            "sad": .sad,
+            "sadness": .sad,
+            "depressed": .sad,
+            "melancholy": .sad,
+            "q4": .relaxed,
+            "3": .relaxed,
+            "relaxed": .relaxed,
+            "relax": .relaxed,
+            "calm": .relaxed,
+            "peaceful": .relaxed,
+            "chill": .relaxed
+        ]
+
+        guard let mood = aliases[normalized] else {
             return nil
         }
 

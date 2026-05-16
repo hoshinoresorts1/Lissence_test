@@ -177,6 +177,9 @@ final class MusicMoodAnalyzer {
 
         let averaged = averageProbabilities(windows)
         let selected = chooseMood(from: averaged)
+        let confidenceText = String(format: "%.4f", selected.confidence)
+
+        debugLog("predicted label=\(result.label), confidence=\(confidenceText), mapped MusicMood=\(selected.mood.rawValue)")
 
         return MusicMoodPrediction(
             mood: selected.mood,
@@ -190,10 +193,17 @@ final class MusicMoodAnalyzer {
         var result: [MusicMood: Double] = [:]
         var sum = 0.0
 
-        for mood in MusicMood.allCases {
-            let value = probabilities[mood.modelLabel] ?? 0.0
-            result[mood] = value
+        for (label, value) in probabilities {
+            guard let mood = MusicMood(modelLabel: label) else {
+                continue
+            }
+
+            result[mood, default: 0.0] += value
             sum += value
+        }
+
+        for mood in MusicMood.allCases where result[mood] == nil {
+            result[mood] = 0.0
         }
 
         guard sum > 0 else {
@@ -285,5 +295,12 @@ final class MusicMoodAnalyzer {
         let newClassifier = try MusicMoodModelClassifier()
         classifier = newClassifier
         return newClassifier
+    }
+
+    /// Debug 빌드에서만 음악모드 analyzer 로그를 출력합니다.
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print("[MusicMoodAnalyzer] \(message)")
+        #endif
     }
 }
