@@ -4,22 +4,18 @@
 
 ## iOS 앱
 
-이 저장소는 Lissence iPhone / Apple Watch 앱을 관리합니다. 현재 작업 브랜치는 ESP32 BLE 연동과 candidate-triggered 위험 감지 PoC를 포함합니다.
+이 저장소는 최종 발표용 Lissence iPhone / Apple Watch 앱을 관리합니다. iPhone이 위험 소리를 분석하고, HearAlert ESP32 보드가 양쪽 마이크 방향 감지와 양쪽 햅틱 모터 출력을 담당하는 구조입니다.
 
 ## 현재 주요 기능
 
 - iPhone 감지 모드
   - iPhone 마이크 기반 SoundAnalysis 위험 소리 감지
   - 음성인식 자막 기능
-  - BLE `audio_candidate` 수신 시 iPhone 마이크 위험 분석을 짧게 실행하는 PoC
+  - 위험 소리 분류 결과를 HearAlert 보드로 BLE write
+  - 분류 시각 `ts`와 분석 window `win`을 함께 전송해 보드의 방향 ring buffer와 매칭
 - iPhone 음악 모드
   - 마이크 입력 기반 음악 mood 분석 PoC
   - mood 상태 ViewModel 노출
-- BLE 테스트 화면
-  - ESP32 Peripheral scan / connect / notify / write
-  - `mic_level`, `audio_candidate` notify 표시
-  - BLE PCM stream reconstruction / ring buffer / lightweight stats PoC
-  - 위험 감지 결과를 ESP32 DRV2605L haptic command로 write
 - Apple Watch 앱
   - 기존 Watch 감지 UI 및 WatchConnectivity 구조 유지
 
@@ -28,15 +24,15 @@
 ESP32 Peripheral:
 
 ```text
-Device name: Lissence-ESP32
-Service UUID: 7d2f3a10-3b7a-4f9f-9b37-6b6a0f4f7c10
-Characteristic UUID: 7d2f3a11-3b7a-4f9f-9b37-6b6a0f4f7c10
+Device name: HearAlert
+Service UUID: 4fafc201-1fb5-459e-8fcc-c5c9c331914b
+Characteristic UUID: beb5483e-36e1-4688-b7f5-ea07361b26a8
 ```
 
 햅틱 write 예시:
 
 ```json
-{"type":"haptic","pattern":"warning"}
+{"type":"haptic","pattern":"siren","ts":123456,"win":975}
 ```
 
 지원 pattern:
@@ -44,8 +40,6 @@ Characteristic UUID: 7d2f3a11-3b7a-4f9f-9b37-6b6a0f4f7c10
 - `siren`
 - `fireAlarm`
 - `carHorn`
-- `warning`
-- `test`
 
 ## 빌드
 
@@ -57,7 +51,7 @@ CLI generic iOS build:
 xcodebuild -project Lissence/Lissence.xcodeproj \
   -scheme Lissence \
   -destination 'generic/platform=iOS' \
-  -derivedDataPath /Users/administrator/Portfolio/Lissence_iOS/DerivedData \
+  -derivedDataPath /Users/administrator/Portfolio/Final_Presentation/iOS_HearAlert_Direction_App/DerivedData \
   CODE_SIGNING_ALLOWED=NO build
 ```
 
