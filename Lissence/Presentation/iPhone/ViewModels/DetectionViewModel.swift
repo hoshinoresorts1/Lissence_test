@@ -10,7 +10,8 @@ class DetectionViewModel: ObservableObject {
     private let soundDetector = SoundDetector()
     private let speechManager = SpeechManager()
     private let connectivity = ConnectivityManager.shared
-    
+    private let bleManager = LissenceBLEManager.shared
+
     // MARK: - Published Properties (View에서 관찰)
     @Published var lastDetectedSound: String = ""
     @Published var transcript: String = ""
@@ -27,12 +28,22 @@ class DetectionViewModel: ObservableObject {
     }
     @Published var currentSoundIcon: String = "waveform.circle"
     @Published var isDanger: Bool = false
-    
+
+    /// ESP32(HearAlert) BLE 연결 여부입니다. 화면 인디케이터에서 관찰합니다.
+    @Published var isBLEConnected: Bool = false
+
+    /// BLE 진행 상태 문구입니다. 화면 인디케이터에서 관찰합니다.
+    @Published var bleStatusText: String = "BLE 대기 중"
+
+    /// 발견한 ESP32 광고 이름입니다.
+    @Published var bleDeviceName: String = "-"
+
     private var cancellables = Set<AnyCancellable>()
     private var resetTimer: Timer?
 
     init() {
         setupBindings()
+        bleManager.delegate = self
     }
 
     // MARK: - 데이터 흐름 연결 (Combine)
@@ -92,12 +103,39 @@ class DetectionViewModel: ObservableObject {
 
     // MARK: - 수명 주기 관리
     func onAppear() {
+        print("📡 [DetectionVM] onAppear → BLE startScan() 강제 호출")
+        // 가이드 §2 계층 3: 감지 모드 진입 시 SoundAnalysis와 BLE 스캔을 동시에 시작합니다.
+        bleManager.delegate = self
         soundDetector.startDetection()
+        bleManager.startScan()
     }
 
     func onDisappear() {
         soundDetector.stopDetection()
         speechManager.stopRecording()
         resetTimer?.invalidate()
+    }
+}
+
+// MARK: - LissenceBLEManagerDelegate
+
+extension DetectionViewModel: LissenceBLEManagerDelegate {
+    func bleManager(_ manager: LissenceBLEManager, didUpdateBluetoothState stateText: String) {
+        // 화면 인디케이터에는 status쪽을 우선 노출하되, BT 자체가 꺼진 경우만 별도로 표시합니다.
+        if stateText.contains("꺼져") || stateText.contains("권한") || stateText.contains("지원하지") {
+            bleStatusText = stateText
+        }
+    }
+
+    func bleManager(_ manager: LissenceBLEManager, didUpdateStatus statusText: String) {
+        bleStatusText = statusText
+    }
+
+    func bleManager(_ manager: LissenceBLEManager, didUpdateConnection isConnected: Bool) {
+        isBLEConnected = isConnected
+    }
+
+    func bleManager(_ manager: LissenceBLEManager, didDiscoverDeviceName deviceName: String) {
+        bleDeviceName = deviceName
     }
 }

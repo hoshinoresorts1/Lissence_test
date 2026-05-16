@@ -114,29 +114,28 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
 
     /// 소리 분석 처리 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
-        print("[SoundDetector] didProduce result")
         guard let result = result as? SNClassificationResult else { return }
-        
+        let classifiedAt = Date()
+
         // 1. 신뢰도 순 정렬 및 임계값 체크
         let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
 
         if let topClassification = sorted.first {
-            let candidates = sorted
+            let top3 = sorted
                 .prefix(3)
-                .map { "\($0.identifier)=\(String(format: "%.3f", $0.confidence))" }
+                .map { "\($0.identifier)(\(Int($0.confidence * 100))%)" }
                 .joined(separator: ", ")
-            print("[SoundDetector] classification candidates: \(candidates)")
+            print("🎧 [SoundDetector] top3: \(top3)")
 
             DispatchQueue.main.async {
                 self.lastAnalyzerClassificationIdentifier = topClassification.identifier
                 self.lastAnalyzerClassificationConfidence = topClassification.confidence
-                print("[SoundDetector] lastAnalyzerLabel updated: \(topClassification.identifier), confidence=\(topClassification.confidence)")
             }
         }
-        
+
         for classification in sorted {
             guard classification.confidence > 0.6 else { break }
-            
+
         // 2. [핵심] 공통 모델에서 소리 타입을 가져옴
             if let sound = DangerSound.from(identifier: classification.identifier) {
                 // 3. 개별 인자를 넘기지 않고 sound 객체 하나만 넘김
@@ -144,7 +143,8 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                     self.lastDetectedSound = sound.label
                     self.lastDetectedDangerSound = sound
                     self.lastDetectionConfidence = classification.confidence
-                    self.sendDangerAlert(sound: sound)
+                    print("🚨 [SoundDetector] DANGER detected: \(sound.label) (confidence=\(String(format: "%.3f", classification.confidence)))")
+                    self.sendDangerAlert(sound: sound, classifiedAt: classifiedAt)
                 }
                 return
             }
@@ -161,10 +161,23 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         print("[SoundDetector] requestDidComplete")
     }
 
-    private func sendDangerAlert(sound: DangerSound) {
+    /// 위험 소리 분류 결과를 Apple Watch와 ESP32 양쪽으로 전달합니다.
+    /// - Parameters:
+    ///   - sound: 분류된 위험 소리 유형.
+    ///   - classifiedAt: 분류 시각. ESP32 방향 윈도 매칭에 사용됩니다.
+    private func sendDangerAlert(sound: DangerSound, classifiedAt: Date) {
+        // 1) Apple Watch 알림 (선택 기능 — Watch 미사용 환경이라면 이 두 줄을 주석 처리)
         let message = MessageData(
             title: sound.label, iconName: sound.icon, isDanger: sound.isDanger
         )
         ConnectivityManager.shared.send(message: message)
+
+        // 2) ESP32 햅틱 명령 (가이드 §0 핵심 경로: 분류 시각 ts와 분석 윈도 win을 함께 전송)
+        guard let pattern = sound.hapticPattern else {
+            print("ℹ️ [SoundDetector] BLE write skipped: \(sound.label)에 매핑된 hapticPattern 없음")
+            return
+        }
+
+        LissenceBLEManager.shared.writeHapticPattern(pattern, classifiedAt: classifiedAt)
     }
 }

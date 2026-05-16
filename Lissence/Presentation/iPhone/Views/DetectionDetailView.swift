@@ -10,13 +10,15 @@ struct DetectionDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            
+
+            bleIndicatorView
+
             Spacer()
-            
+
             contentView
-            
+
             Spacer()
-            
+
             bottomControls
         }
         // 자막창 시트: viewModel의 isVoiceOn 상태에 따라 자동으로 열림
@@ -39,7 +41,7 @@ struct DetectionDetailView: View {
 
 // MARK: - UI Components (Extensions)
 extension DetectionDetailView {
-    
+
     // 1. 헤더: 홈 버튼 및 음성 인식 토글
     private var headerView: some View {
         HStack {
@@ -49,9 +51,9 @@ extension DetectionDetailView {
                     .foregroundColor(.gray)
                     .frame(width: 44, height: 44)
             }
-            
+
             Spacer()
-            
+
             // 토글 버튼: 클릭 시 ViewModel의 오디오 세션 제어 로직 실행
             Button(action: { viewModel.toggleVoiceMode() }) {
                 HStack {
@@ -67,7 +69,39 @@ extension DetectionDetailView {
         }
         .padding()
     }
-    
+
+    // 1-1. BLE 연결 상태 인디케이터 (헤더 바로 아래에 한 줄)
+    private var bleIndicatorView: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(viewModel.isBLEConnected ? Color.green : Color.gray)
+                .frame(width: 10, height: 10)
+
+            Text(viewModel.isBLEConnected
+                 ? "ESP32 연결됨 (\(viewModel.bleDeviceName))"
+                 : "ESP32 미연결")
+                .font(.footnote)
+                .foregroundColor(viewModel.isBLEConnected ? .green : .secondary)
+
+            Spacer()
+
+            Text(viewModel.bleStatusText)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 6)
+        .background(
+            (viewModel.isBLEConnected ? Color.green : Color.gray)
+                .opacity(0.08)
+        )
+        .cornerRadius(8)
+        .padding(.horizontal)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isBLEConnected)
+    }
+
     // 2. 메인 컨텐츠: 소리 감지 결과 표시
     private var contentView: some View {
         VStack {
@@ -84,7 +118,7 @@ extension DetectionDetailView {
                     Image(systemName: viewModel.currentSoundIcon)
                         .font(.system(size: 100))
                         .foregroundColor(viewModel.isDanger ? .red : .blue)
-                    
+
                     Text(viewModel.lastDetectedSound)
                         .font(.system(size: 32, weight: .bold))
                 }
@@ -93,7 +127,7 @@ extension DetectionDetailView {
         }
         .animation(.spring(), value: viewModel.lastDetectedSound)
     }
-    
+
     // 3. 하단 컨트롤: 모드 전환 버튼
     private var bottomControls: some View {
         Button(action: { currentPath = "music" }) {
