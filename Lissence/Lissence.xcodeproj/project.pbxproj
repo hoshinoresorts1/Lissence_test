@@ -42,8 +42,6 @@
 		C5B100112FA5000000000001 /* LissenceBLEConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100012FA5000000000001 /* LissenceBLEConstants.swift */; };
 		C5B100122FA5000000000001 /* LissenceBLEMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100022FA5000000000001 /* LissenceBLEMessage.swift */; };
 		C5B100132FA5000000000001 /* LissenceBLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100032FA5000000000001 /* LissenceBLEManager.swift */; };
-		C5B100142FA5000000000001 /* BLETestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100042FA5000000000001 /* BLETestViewModel.swift */; };
-		C5B100152FA5000000000001 /* BLETestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B100052FA5000000000001 /* BLETestView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,8 +101,6 @@
 		C5B100012FA5000000000001 /* LissenceBLEConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEConstants.swift; sourceTree = "<group>"; };
 		C5B100022FA5000000000001 /* LissenceBLEMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEMessage.swift; sourceTree = "<group>"; };
 		C5B100032FA5000000000001 /* LissenceBLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LissenceBLEManager.swift; sourceTree = "<group>"; };
-		C5B100042FA5000000000001 /* BLETestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETestViewModel.swift; sourceTree = "<group>"; };
-		C5B100052FA5000000000001 /* BLETestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETestView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -237,7 +233,6 @@
 				C34B94942F75072600ADDF8E /* DetectionDetailView.swift */,
 				C34B94982F75072600ADDF8E /* MusicDetailView.swift */,
 				C4A1000B2FA6000000000001 /* MusicMoodParticleView.swift */,
-				C5B100052FA5000000000001 /* BLETestView.swift */,
 				C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */,
 			);
 			path = Views;
@@ -248,7 +243,6 @@
 			children = (
 				C34B94BE2F764D8600ADDF8E /* DetectionViewModel.swift */,
 				C4A100082FA2000000000001 /* MusicViewModel.swift */,
-				C5B100042FA5000000000001 /* BLETestViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -423,7 +417,6 @@
 				C34B949E2F75072600ADDF8E /* DetectionDetailView.swift in Sources */,
 				C4A100142FA2000000000001 /* AudioFeatureExtractor.swift in Sources */,
 				C34B94A02F75072600ADDF8E /* MainHomeView.swift in Sources */,
-				C5B100152FA5000000000001 /* BLETestView.swift in Sources */,
 				C34B94BF2F764D8600ADDF8E /* DetectionViewModel.swift in Sources */,
 				C4A100152FA2000000000001 /* TrainingStats.swift in Sources */,
 				C5B100122FA5000000000001 /* LissenceBLEMessage.swift in Sources */,
@@ -437,7 +430,6 @@
 				C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */,
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
 				C4A100132FA2000000000001 /* MusicMoodModelClassifier.swift in Sources */,
-				C5B100142FA5000000000001 /* BLETestViewModel.swift in Sources */,
 				C4A1001B2FA6000000000001 /* MusicMoodParticleView.swift in Sources */,
 				C4A100182FA2000000000001 /* MusicViewModel.swift in Sources */,
 				C4A100172FA2000000000001 /* MusicMoodAnalyzer.swift in Sources */,

@@ -29,10 +29,6 @@ struct MainHomeView: View {
                 Button(action: { currentPath = "music" }) {
                     ModeSelectionCard(title: "음악 모드", icon: "music.note.list", color: .purple, description: "음악 시각화 및 햅틱 변환")
                 }
-
-                Button(action: { currentPath = "bleTest" }) {
-                    ModeSelectionCard(title: "BLE 테스트", icon: "antenna.radiowaves.left.and.right", color: .green, description: "ESP32 BLE 연결 및 메시지 검증")
-                }
             }
             .padding(.horizontal, 30)
 
