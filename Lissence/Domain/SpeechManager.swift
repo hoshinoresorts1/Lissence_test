@@ -154,17 +154,6 @@ class SpeechManager: NSObject, ObservableObject {
                 // 실시간으로 변환된 텍스트를 transcript에 저장
                 DispatchQueue.main.async {
                     self.transcript = result.bestTranscription.formattedString
-
-                    // 만약 특정 단어가 포함되어 있다면? (감지 모드 테스트)
-                    if self.transcript.contains("저기요") || self.transcript.contains("안녕하세요") {
-                        let speechLevel = DangerSound.speech // 공통 모델 활용
-                        let message = MessageData(
-                            title: "누군가 말을 걸었습니다!",
-                            iconName: speechLevel.icon,
-                            isDanger: speechLevel.isDanger
-                        )
-                        ConnectivityManager.shared.send(message: message)
-                    }
                 }
             }
 
