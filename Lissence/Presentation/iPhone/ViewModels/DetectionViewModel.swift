@@ -13,6 +13,7 @@ class DetectionViewModel: NSObject, ObservableObject {
     private let attentionCallAnalyzer = AttentionCallAnalyzer()
     private let connectivity = ConnectivityManager.shared
     private let bleManager = LissenceBLEManager.shared
+    private let dangerHapticController = DangerHapticController()
 
     // MARK: - Published Properties (View에서 관찰)
     @Published var lastDetectedSound: String = ""
@@ -46,6 +47,9 @@ class DetectionViewModel: NSObject, ObservableObject {
     private var lastAttentionAlertTime: Date = .distantPast
     private var lastAttentionAlertSignature = ""
     private let attentionAlertCooldown: TimeInterval = 1.5
+    private var lastDangerHapticTime: Date = .distantPast
+    private var lastDangerHapticSound: DangerSound = .unknown
+    private let dangerHapticCooldown: TimeInterval = 1.0
 
     override init() {
         super.init()
@@ -108,6 +112,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             self.lastDetectedSound = label
             self.currentSoundIcon = sound.icon
             self.isDanger = sound.isDanger
+            playDangerHapticIfNeeded(for: sound)
 
             // 5초 후 UI 초기화 타이머
             resetTimer?.invalidate()
@@ -117,6 +122,24 @@ class DetectionViewModel: NSObject, ObservableObject {
                 }
             }
         }
+    }
+
+    /// 위험 소리 종류별 iPhone 햅틱을 출력합니다.
+    private func playDangerHapticIfNeeded(for sound: DangerSound) {
+        guard sound.isDanger else {
+            return
+        }
+
+        let now = Date()
+        guard sound != lastDangerHapticSound ||
+                now.timeIntervalSince(lastDangerHapticTime) >= dangerHapticCooldown else {
+            print("📳 [iPhoneHaptic] skipped cooldown")
+            return
+        }
+
+        lastDangerHapticSound = sound
+        lastDangerHapticTime = now
+        dangerHapticController.play(for: sound)
     }
 
     /// Speech transcript를 조건 기반 호출 감지로 변환합니다.

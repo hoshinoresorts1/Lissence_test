@@ -15,6 +15,7 @@
 		C34B94A22F75072600ADDF8E /* SoundDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94992F75072600ADDF8E /* SoundDetector.swift */; };
 		C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B949A2F75072600ADDF8E /* SpeechManager.swift */; };
 		C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */; };
+		C34B94AC2F75072600ADDF8E /* DangerHapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A52F75072600ADDF8E /* DangerHapticController.swift */; };
 		C34B94AD2F75072600ADDF8E /* HapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A62F75072600ADDF8E /* HapticController.swift */; };
 		C34B94AE2F75072600ADDF8E /* SoundClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A72F75072600ADDF8E /* SoundClassifier.swift */; };
 		C34B94AF2F75072600ADDF8E /* AttentionCallAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */; };
@@ -78,6 +79,7 @@
 		C34B94992F75072600ADDF8E /* SoundDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundDetector.swift; sourceTree = "<group>"; };
 		C34B949A2F75072600ADDF8E /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
 		C34B949B2F75072600ADDF8E /* SubtitleWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleWidgetView.swift; sourceTree = "<group>"; };
+		C34B94A52F75072600ADDF8E /* DangerHapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DangerHapticController.swift; sourceTree = "<group>"; };
 		C34B94A62F75072600ADDF8E /* HapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticController.swift; sourceTree = "<group>"; };
 		C34B94A72F75072600ADDF8E /* SoundClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundClassifier.swift; sourceTree = "<group>"; };
 		C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionCallAnalyzer.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 				C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */,
 				C34B94992F75072600ADDF8E /* SoundDetector.swift */,
 				C34B949A2F75072600ADDF8E /* SpeechManager.swift */,
+				C34B94A52F75072600ADDF8E /* DangerHapticController.swift */,
 				C34B94A72F75072600ADDF8E /* SoundClassifier.swift */,
 				C34B94A62F75072600ADDF8E /* HapticController.swift */,
 			);
@@ -431,6 +434,7 @@
 				C4A100192FA6000000000001 /* MusicAudioLevel.swift in Sources */,
 				C34B94A32F75072600ADDF8E /* SpeechManager.swift in Sources */,
 				C34B94A42F75072600ADDF8E /* SubtitleWidgetView.swift in Sources */,
+				C34B94AC2F75072600ADDF8E /* DangerHapticController.swift in Sources */,
 				C3B57C622F5EDD28002C9D36 /* ConnectivityManager.swift in Sources */,
 				C4A100132FA2000000000001 /* MusicMoodModelClassifier.swift in Sources */,
 				C4A1001B2FA6000000000001 /* MusicMoodParticleView.swift in Sources */,

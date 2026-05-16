@@ -3,6 +3,14 @@
 
 import Foundation
 
+enum AlertHapticPattern: String, Codable {
+    case siren
+    case fireAlarm
+    case carHorn
+    case genericDanger
+    case gentleNotice
+}
+
 enum DangerSound: String, CaseIterable {
     case siren, fireAlarm, shouting, carHorn, knock, speech, unknown
 
@@ -51,6 +59,22 @@ enum DangerSound: String, CaseIterable {
             return "carHorn"
         case .shouting, .knock, .speech, .unknown:
             return nil
+        }
+    }
+
+    /// iPhone과 Apple Watch에서 공통으로 사용하는 발표용 위험 햅틱 패턴입니다.
+    var alertHapticPattern: AlertHapticPattern {
+        switch self {
+        case .siren:
+            return .siren
+        case .fireAlarm:
+            return .fireAlarm
+        case .carHorn:
+            return .carHorn
+        case .shouting:
+            return .genericDanger
+        case .knock, .speech, .unknown:
+            return .gentleNotice
         }
     }
     

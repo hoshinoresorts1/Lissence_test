@@ -87,11 +87,12 @@ final class LissenceBLEManager: NSObject {
             // 초기화 직후 state는 .unknown이며, 잠시 후 didUpdateState 콜백에서 .poweredOn으로 전환됩니다.
             // 그 사이 호출된 startScan은 여기서 pending으로 보관해 두고, 상태 전환 시 자동 재시도합니다.
             guard self.centralManager.state == .poweredOn else {
-                self.pendingScanRequest = true
+                self.pendingScanRequest = self.centralManager.state == .unknown ||
+                    self.centralManager.state == .resetting
                 let stateText = self.stateText(for: self.centralManager.state)
                 self.notifyStatus("Bluetooth 준비 대기 중 (\(stateText))")
                 self.notifyBluetoothState(stateText)
-                print("📡 [LissenceBLE] startScan deferred: state=\(stateText), pendingScanRequest=true")
+                print("📡 [LissenceBLE] startScan deferred: state=\(stateText), pendingScanRequest=\(self.pendingScanRequest)")
                 return
             }
 
@@ -139,19 +140,40 @@ final class LissenceBLEManager: NSObject {
     /// - Returns: 실제로 write 요청을 보냈으면 true, 쿨다운/미연결로 건너뛰면 false.
     @discardableResult
     func writeHapticPattern(_ pattern: String, classifiedAt: Date = Date()) -> Bool {
-        let now = Date()
+        bluetoothQueue.async { [weak self] in
+            guard let self else { return }
 
-        guard now.timeIntervalSince(lastHapticWriteAt) >= LissenceBLEConstants.bleWriteCooldownSeconds else {
-            print("⏱️ [LissenceBLE] write skipped (cooldown) pattern=\(pattern)")
-            return false
+            guard self.centralManager.state == .poweredOn else {
+                print("📡 [BLEHaptic] skip: Bluetooth not powered on")
+                return
+            }
+
+            guard let connectedPeripheral = self.connectedPeripheral,
+                  connectedPeripheral.state == .connected else {
+                print("📡 [BLEHaptic] skip: peripheral not connected")
+                return
+            }
+
+            guard let messageCharacteristic = self.messageCharacteristic else {
+                print("📡 [BLEHaptic] skip: characteristic unavailable")
+                return
+            }
+
+            let now = Date()
+            guard now.timeIntervalSince(self.lastHapticWriteAt) >= LissenceBLEConstants.bleWriteCooldownSeconds else {
+                print("📡 [BLEHaptic] skip: cooldown pattern=\(pattern)")
+                return
+            }
+
+            let ts = self.esp32TimestampMillis(for: classifiedAt)
+            let win = Int(LissenceBLEConstants.analysisWindowSeconds * 1000)
+            let payload = #"{"type":"haptic","pattern":"\#(pattern)","ts":\#(ts),"win":\#(win)}"#
+
+            self.lastHapticWriteAt = now
+            self.write(payload, peripheral: connectedPeripheral, characteristic: messageCharacteristic)
+            print("📡 [BLEHaptic] write pattern=\(pattern)")
         }
 
-        let ts = esp32TimestampMillis(for: classifiedAt)
-        let win = Int(LissenceBLEConstants.analysisWindowSeconds * 1000)
-        let payload = #"{"type":"haptic","pattern":"\#(pattern)","ts":\#(ts),"win":\#(win)}"#
-
-        lastHapticWriteAt = now
-        write(payload)
         return true
     }
 
@@ -160,33 +182,49 @@ final class LissenceBLEManager: NSObject {
         bluetoothQueue.async { [weak self] in
             guard let self else { return }
 
+            guard self.centralManager.state == .poweredOn else {
+                self.notifyStatus("BLE write skipped: Bluetooth off")
+                print("📡 [BLEHaptic] skip: Bluetooth not powered on")
+                return
+            }
+
             guard let connectedPeripheral = self.connectedPeripheral,
-                  let messageCharacteristic = self.messageCharacteristic else {
-                self.notifyStatus("⚠️ write skipped: no BLE connection")
-                print("⚠️ [LissenceBLE] write skipped: no BLE connection (text=\(text))")
+                  connectedPeripheral.state == .connected else {
+                self.notifyStatus("BLE write skipped: peripheral not connected")
+                print("📡 [BLEHaptic] skip: peripheral not connected")
                 return
             }
 
-            guard let data = text.data(using: .utf8) else {
-                self.notifyStatus("UTF-8 변환 실패")
+            guard let messageCharacteristic = self.messageCharacteristic else {
+                self.notifyStatus("BLE write skipped: characteristic unavailable")
+                print("📡 [BLEHaptic] skip: characteristic unavailable")
                 return
             }
 
-            let writeType = self.writeType(for: messageCharacteristic)
-            if writeType == .withResponse {
-                self.pendingWritePayload = text
-            }
+            self.write(text, peripheral: connectedPeripheral, characteristic: messageCharacteristic)
+        }
+    }
 
-            connectedPeripheral.writeValue(data, for: messageCharacteristic, type: writeType)
-            let typeText = writeType == .withoutResponse ? "WRITE_NR" : "WRITE_R"
-            print("📤 [LissenceBLE] write → ESP32 (\(typeText)): \(text)")
+    private func write(_ text: String, peripheral: CBPeripheral, characteristic: CBCharacteristic) {
+        guard let data = text.data(using: .utf8) else {
+            notifyStatus("UTF-8 변환 실패")
+            return
+        }
 
-            if writeType == .withoutResponse {
-                self.notifySentMessage(text)
-                self.notifyStatus("BLE 메시지 전송 요청 완료")
-            } else {
-                self.notifyStatus("BLE 메시지 전송 중")
-            }
+        let writeType = writeType(for: characteristic)
+        if writeType == .withResponse {
+            pendingWritePayload = text
+        }
+
+        peripheral.writeValue(data, for: characteristic, type: writeType)
+        let typeText = writeType == .withoutResponse ? "WRITE_NR" : "WRITE_R"
+        print("📤 [LissenceBLE] write → ESP32 (\(typeText)): \(text)")
+
+        if writeType == .withoutResponse {
+            notifySentMessage(text)
+            notifyStatus("BLE 메시지 전송 요청 완료")
+        } else {
+            notifyStatus("BLE 메시지 전송 중")
         }
     }
 
@@ -238,6 +276,12 @@ final class LissenceBLEManager: NSObject {
 
     /// Service UUID 스캔에서 연결되지 않은 경우 이름 기반 fallback 스캔을 시작합니다.
     private func startNameFallbackScanIfNeeded() {
+        guard centralManager.state == .poweredOn else {
+            isNameFallbackScan = false
+            print("📡 [LissenceBLE] fallback scan skipped: state=\(stateText(for: centralManager.state))")
+            return
+        }
+
         guard connectedPeripheral == nil else {
             return
         }

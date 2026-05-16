@@ -15,16 +15,41 @@ class HapticController {
         guard now.timeIntervalSince(lastHapticTime) > cooldown else { return }
         lastHapticTime = now
 
-        if sound.isDanger {
-            // 위험 상황: 강하고 긴 진동 (Success 패턴 + 추가 진동)
+        guard sound.isDanger else {
+            // 일반 상황: 가벼운 알림 진동
+            WKInterfaceDevice.current().play(.notification)
+            return
+        }
+
+        switch sound.alertHapticPattern {
+        case .siren:
+            WKInterfaceDevice.current().play(.notification)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                WKInterfaceDevice.current().play(.directionUp)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.50) {
+                WKInterfaceDevice.current().play(.notification)
+            }
+        case .fireAlarm:
+            WKInterfaceDevice.current().play(.failure)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                WKInterfaceDevice.current().play(.retry)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.36) {
+                WKInterfaceDevice.current().play(.failure)
+            }
+        case .carHorn:
+            WKInterfaceDevice.current().play(.click)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                WKInterfaceDevice.current().play(.click)
+            }
+        case .genericDanger:
             WKInterfaceDevice.current().play(.success)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                WKInterfaceDevice.current().play(.directionUp) // 주의를 끄는 상승 진동
+                WKInterfaceDevice.current().play(.directionUp)
             }
-        } else {
-            // 일반 상황: 가벼운 알림 진동
+        case .gentleNotice:
             WKInterfaceDevice.current().play(.notification)
         }
     }
 }
-

@@ -143,7 +143,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                     self.lastDetectedSound = sound.label
                     self.lastDetectedDangerSound = sound
                     self.lastDetectionConfidence = classification.confidence
-                    print("🚨 [SoundDetector] DANGER detected: \(sound.label) (confidence=\(String(format: "%.3f", classification.confidence)))")
+                    print("🚨 [SoundDetector] DANGER detected: \(sound.rawValue) (confidence=\(String(format: "%.3f", classification.confidence)))")
                     self.sendDangerAlert(sound: sound, classifiedAt: classifiedAt)
                 }
                 return
@@ -168,8 +168,12 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private func sendDangerAlert(sound: DangerSound, classifiedAt: Date) {
         // 1) Apple Watch 알림 (선택 기능 — Watch 미사용 환경이라면 이 두 줄을 주석 처리)
         let message = MessageData(
-            title: sound.label, iconName: sound.icon, isDanger: sound.isDanger
+            title: sound.label,
+            iconName: sound.icon,
+            isDanger: sound.isDanger,
+            dangerSoundRawValue: sound.rawValue
         )
+        print("⌚️ [WatchAlert] send danger=\(sound.rawValue)")
         ConnectivityManager.shared.send(message: message)
 
         // 2) ESP32 햅틱 명령 (가이드 §0 핵심 경로: 분류 시각 ts와 분석 윈도 win을 함께 전송)

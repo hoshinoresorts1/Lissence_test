@@ -59,10 +59,10 @@ class WatchDetectionViewModel: ObservableObject {
         connectivity.$receivedMessage
             .compactMap { $0 }
             .sink { [weak self] message in
-                // MessageData로부터 DangerSound를 유추하거나 일반 알림 햅틱을 실행
-                // 여기서는 일반 알림 햅틱을 실행하도록 HapticController를 활용할 수 있습니다.
                 if message.isDanger {
-                    self?.haptic.play(for: .siren) // 위험 상황 햅틱
+                    let sound = message.dangerSoundRawValue
+                        .flatMap(DangerSound.init(rawValue:)) ?? .siren
+                    self?.haptic.play(for: sound)
                 }
             }
             .store(in: &cancellables)
