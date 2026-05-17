@@ -71,11 +71,11 @@ final class DangerHapticController {
         }
 
         let events = [
-            continuous(time: 0.00, duration: 0.18, intensity: 1.0, sharpness: 0.92),
-            transient(time: 0.20, intensity: 0.92, sharpness: 1.0),
-            continuous(time: 0.42, duration: 0.18, intensity: 1.0, sharpness: 0.92),
-            transient(time: 0.62, intensity: 0.92, sharpness: 1.0),
-            continuous(time: 0.84, duration: 0.18, intensity: 1.0, sharpness: 0.92)
+            continuous(time: 0.00, duration: 0.20, intensity: 1.0, sharpness: 1.0),
+            transient(time: 0.20, intensity: 1.0, sharpness: 1.0),
+            continuous(time: 0.42, duration: 0.20, intensity: 1.0, sharpness: 1.0),
+            transient(time: 0.62, intensity: 1.0, sharpness: 1.0),
+            continuous(time: 0.84, duration: 0.20, intensity: 1.0, sharpness: 1.0)
         ]
         play(events: events)
     }
@@ -86,12 +86,12 @@ final class DangerHapticController {
             return
         }
 
+        print("📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap")
         let events = [
-            transient(time: 0.00, intensity: 1.0, sharpness: 1.0),
-            transient(time: 0.13, intensity: 1.0, sharpness: 1.0),
-            transient(time: 0.26, intensity: 1.0, sharpness: 1.0),
-            transient(time: 0.39, intensity: 1.0, sharpness: 1.0),
-            transient(time: 0.52, intensity: 1.0, sharpness: 1.0)
+            continuous(time: 0.00, duration: 0.58, intensity: 1.0, sharpness: 0.82),
+            transient(time: 0.66, intensity: 1.0, sharpness: 1.0),
+            continuous(time: 0.665, duration: 0.045, intensity: 1.0, sharpness: 1.0),
+            transient(time: 0.70, intensity: 1.0, sharpness: 1.0)
         ]
         play(events: events)
     }
@@ -103,10 +103,10 @@ final class DangerHapticController {
         }
 
         let events = [
-            transient(time: 0.00, intensity: 1.0, sharpness: 0.88),
-            continuous(time: 0.01, duration: 0.08, intensity: 0.92, sharpness: 0.75),
-            transient(time: 0.16, intensity: 1.0, sharpness: 0.88),
-            continuous(time: 0.17, duration: 0.08, intensity: 0.92, sharpness: 0.75)
+            transient(time: 0.00, intensity: 1.0, sharpness: 1.0),
+            continuous(time: 0.01, duration: 0.09, intensity: 1.0, sharpness: 0.92),
+            transient(time: 0.16, intensity: 1.0, sharpness: 1.0),
+            continuous(time: 0.17, duration: 0.09, intensity: 1.0, sharpness: 0.92)
         ]
         play(events: events)
     }
