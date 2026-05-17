@@ -24,6 +24,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             if oldValue == true && isVoiceOn == false {
                 speechManager.stopRecording()
                 attentionCallAnalyzer.reset()
+                resetConversationState()
                 if !soundDetector.isRunning {
                     soundDetector.startDetection()
                 }
@@ -42,8 +43,25 @@ class DetectionViewModel: NSObject, ObservableObject {
     /// 발견한 ESP32 광고 이름입니다.
     @Published var bleDeviceName: String = "-"
 
+    /// 자막 시트 표시 모드입니다.
+    @Published var conversationMode: ConversationMode = .subtitle
+
+    /// 대화 모드 메시지 기록입니다.
+    @Published var messages: [ChatMessage] = []
+
+    /// 사용자가 TTS로 출력할 문장입니다.
+    @Published var inputText: String = ""
+
+    let quickPhrases = QuickPhrase.defaults
+    let inputCharLimit = 200
+    let defaultTTSGuide = "저는 청각장애인입니다. 아이폰 마이크에 대고 천천히 이야기해주세요."
+
     private var cancellables = Set<AnyCancellable>()
     private var resetTimer: Timer?
+    private var commitTimer: Timer?
+    private var ttsWatchdog: Timer?
+    private var lastCommittedTranscript = ""
+    private var isMicSuspendedForTTS = false
     private var lastAttentionAlertTime: Date = .distantPast
     private var lastAttentionAlertSignature = ""
     private let attentionAlertCooldown: TimeInterval = 1.5
@@ -55,6 +73,7 @@ class DetectionViewModel: NSObject, ObservableObject {
         super.init()
         setupBindings()
         bleManager.delegate = self
+        TTSManager.shared.delegate = self
     }
 
     // MARK: - 데이터 흐름 연결 (Combine)
@@ -75,6 +94,7 @@ class DetectionViewModel: NSObject, ObservableObject {
 
                 self.transcript = transcript
                 self.handleAttentionCallTranscript(transcript)
+                self.schedulePartnerCommit(for: transcript)
             }
             .store(in: &cancellables)
     }
@@ -87,6 +107,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             attentionCallAnalyzer.reset()
             lastAttentionAlertSignature = ""
             lastAttentionAlertTime = .distantPast
+            lastCommittedTranscript = ""
 
             // 실험 브랜치 전용: 음성인식 중에도 SoundAnalysis 위험 감지가 유지되는지 확인합니다.
             // 기존 안정 구조로 되돌리려면 아래 호출을 복구합니다.
@@ -100,6 +121,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             // 3. 음성 인식 종료 후 다시 소리 감지 재개
             speechManager.stopRecording()
             attentionCallAnalyzer.reset()
+            resetConversationState()
             if !soundDetector.isRunning {
                 soundDetector.startDetection()
             }
@@ -233,6 +255,7 @@ class DetectionViewModel: NSObject, ObservableObject {
         print("📡 [DetectionVM] onAppear → BLE startScan() 강제 호출")
         // 가이드 §2 계층 3: 감지 모드 진입 시 SoundAnalysis와 BLE 스캔을 동시에 시작합니다.
         bleManager.delegate = self
+        TTSManager.shared.delegate = self
         soundDetector.startDetection()
         bleManager.startScan()
     }
@@ -241,10 +264,110 @@ class DetectionViewModel: NSObject, ObservableObject {
         soundDetector.stopDetection()
         speechManager.stopRecording()
         attentionCallAnalyzer.reset()
+        TTSManager.shared.stop()
         // BLE 연결은 백그라운드 위험 감지에도 사용될 수 있으므로 유지합니다.
         // 화면 떠날 때 명시적으로 끊고 싶다면 아래 줄을 활성화하세요.
         // bleManager.stop()
         resetTimer?.invalidate()
+        commitTimer?.invalidate()
+        ttsWatchdog?.invalidate()
+        ttsWatchdog = nil
+    }
+
+    // MARK: - 대화 모드
+
+    /// 상대방 STT transcript를 일정 침묵 후 대화 메시지로 저장합니다.
+    private func schedulePartnerCommit(for text: String) {
+        guard conversationMode == .chat else {
+            return
+        }
+
+        guard !isMicSuspendedForTTS else {
+            return
+        }
+
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty, trimmedText != lastCommittedTranscript else {
+            return
+        }
+
+        commitTimer?.invalidate()
+        commitTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.commitPartnerMessage()
+            }
+        }
+    }
+
+    /// SpeechManager의 누적 transcript에서 아직 메시지화하지 않은 새 부분만 저장합니다.
+    private func commitPartnerMessage() {
+        let fullTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !fullTranscript.isEmpty else {
+            return
+        }
+
+        let newPart: String
+        if !lastCommittedTranscript.isEmpty, fullTranscript.hasPrefix(lastCommittedTranscript) {
+            newPart = String(fullTranscript.dropFirst(lastCommittedTranscript.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            newPart = fullTranscript
+        }
+
+        guard !newPart.isEmpty else {
+            return
+        }
+
+        messages.append(ChatMessage(text: newPart, sender: .partner))
+        lastCommittedTranscript = fullTranscript
+    }
+
+    func speakDefaultGuide() {
+        speakText(defaultTTSGuide, appendMessage: true)
+    }
+
+    func sendMyMessage(speak: Bool = true) {
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            return
+        }
+
+        inputText = ""
+        speakText(text, appendMessage: true, speak: speak)
+    }
+
+    func sendQuickPhrase(_ phrase: QuickPhrase) {
+        speakText(phrase.text, appendMessage: true)
+    }
+
+    func replay(_ message: ChatMessage) {
+        TTSManager.shared.speak(message.text)
+    }
+
+    private func speakText(_ text: String, appendMessage: Bool, speak: Bool = true) {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            return
+        }
+
+        if appendMessage {
+            messages.append(ChatMessage(text: trimmedText, sender: .me, wasSpoken: speak))
+        }
+
+        if speak {
+            TTSManager.shared.speak(trimmedText)
+        }
+    }
+
+    private func resetConversationState() {
+        lastCommittedTranscript = ""
+        commitTimer?.invalidate()
+        ttsWatchdog?.invalidate()
+        ttsWatchdog = nil
+        isMicSuspendedForTTS = false
+        messages.removeAll()
+        inputText = ""
+        conversationMode = .subtitle
     }
 }
 
@@ -268,5 +391,53 @@ extension DetectionViewModel: LissenceBLEManagerDelegate {
 
     func bleManager(_ manager: LissenceBLEManager, didDiscoverDeviceName deviceName: String) {
         bleDeviceName = deviceName
+    }
+}
+
+// MARK: - TTSManagerDelegate
+
+extension DetectionViewModel: TTSManagerDelegate {
+    func ttsManagerWillStartSpeaking(_ manager: TTSManager) {
+        guard isVoiceOn else {
+            return
+        }
+
+        isMicSuspendedForTTS = true
+        speechManager.stopRecording()
+        commitTimer?.invalidate()
+
+        ttsWatchdog?.invalidate()
+        ttsWatchdog = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            print("[DetectionVM] TTS watchdog fired; forcing mic resume")
+            self.ttsManagerDidFinishSpeaking(TTSManager.shared)
+        }
+    }
+
+    func ttsManagerDidFinishSpeaking(_ manager: TTSManager) {
+        ttsWatchdog?.invalidate()
+        ttsWatchdog = nil
+
+        guard isMicSuspendedForTTS else {
+            return
+        }
+
+        isMicSuspendedForTTS = false
+
+        guard isVoiceOn else {
+            return
+        }
+
+        lastCommittedTranscript = ""
+        transcript = ""
+        commitTimer?.invalidate()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+            guard let self, self.isVoiceOn, !self.isMicSuspendedForTTS else {
+                return
+            }
+
+            self.speechManager.startRecording()
+        }
     }
 }
