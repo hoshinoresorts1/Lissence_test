@@ -54,6 +54,15 @@ final class MusicMoodAnalyzer {
     /// 평균에 사용할 최근 window 개수입니다.
     private let maxWindowCount = 3
 
+    /// 급격히 다른 분포가 들어왔을 때 이전 평균이 새 무드를 끌고 가지 않도록 초기화하는 기준입니다.
+    private let moodChangeDistanceThreshold = 0.35
+
+    /// 새 window가 충분히 확신을 가질 때 평균 초기화를 허용하는 기준입니다.
+    private let moodChangeConfidenceThreshold = 0.35
+
+    /// 1, 2순위 확률 차이가 이 값보다 크면 새 window를 명확한 변화로 봅니다.
+    private let moodChangeMarginThreshold = 0.08
+
     // MARK: - 초기화
 
     /// 의존성을 주입해 분석기를 생성합니다.
@@ -169,6 +178,12 @@ final class MusicMoodAnalyzer {
     /// 원시 classifier 결과를 앱 도메인 예측 결과로 변환합니다.
     private func makePrediction(from result: MusicMoodClassifierResult) -> MusicMoodPrediction {
         let normalized = normalizeProbabilities(result.probabilities)
+        let didResetAverage = shouldResetAverage(with: normalized)
+
+        if didResetAverage {
+            windows.removeAll()
+        }
+
         windows.append(normalized)
 
         if windows.count > maxWindowCount {
@@ -179,7 +194,9 @@ final class MusicMoodAnalyzer {
         let selected = chooseMood(from: averaged)
         let confidenceText = String(format: "%.4f", selected.confidence)
 
-        debugLog("predicted label=\(result.label), confidence=\(confidenceText), mapped MusicMood=\(selected.mood.rawValue)")
+        debugLog(
+            "predicted label=\(result.label), confidence=\(confidenceText), mapped MusicMood=\(selected.mood.rawValue), resetAverage=\(didResetAverage), Q1=\(format(normalized[.happy] ?? 0)), Q2=\(format(normalized[.angry] ?? 0)), Q3=\(format(normalized[.sad] ?? 0)), Q4=\(format(normalized[.relaxed] ?? 0)), Q5=\(format(normalized[.neutral] ?? 0))"
+        )
 
         return MusicMoodPrediction(
             mood: selected.mood,
@@ -243,15 +260,25 @@ final class MusicMoodAnalyzer {
         let angry = probabilities[.angry] ?? 0.0
         let sad = probabilities[.sad] ?? 0.0
         let relaxed = probabilities[.relaxed] ?? 0.0
+        let neutral = probabilities[.neutral] ?? 0.0
 
         let rawCandidates: [(MusicMood, Double)] = [
             (.happy, happy),
             (.angry, angry),
             (.sad, sad),
-            (.relaxed, relaxed)
+            (.relaxed, relaxed),
+            (.neutral, neutral)
         ]
 
-        let rawBest = rawCandidates.max { $0.1 < $1.1 } ?? (.happy, happy)
+        let sortedCandidates = rawCandidates.sorted { $0.1 > $1.1 }
+        let rawBest = sortedCandidates.first ?? (.neutral, neutral)
+        let runnerUp = sortedCandidates.dropFirst().first?.1 ?? 0.0
+        let margin = rawBest.1 - runnerUp
+
+        if rawBest.1 < 0.40 || margin < 0.08 {
+            return (.neutral, max(neutral, rawBest.1))
+        }
+
         let relaxedMinimum = 0.20
         let relaxedTolerance = 0.07
 
@@ -266,10 +293,11 @@ final class MusicMoodAnalyzer {
         let nonAngryCandidates: [(MusicMood, Double)] = [
             (.happy, happy),
             (.sad, sad),
-            (.relaxed, relaxed)
+            (.relaxed, relaxed),
+            (.neutral, neutral)
         ]
 
-        let nonAngryBest = nonAngryCandidates.max { $0.1 < $1.1 } ?? (.happy, happy)
+        let nonAngryBest = nonAngryCandidates.max { $0.1 < $1.1 } ?? (.neutral, neutral)
         let angryMinimum = 0.32
         let angryMargin = 0.04
 
@@ -282,6 +310,30 @@ final class MusicMoodAnalyzer {
         }
 
         return nonAngryBest
+    }
+
+    /// 새 window가 이전 평균과 충분히 다르면 평균 버퍼를 비워 반응 지연을 줄입니다.
+    private func shouldResetAverage(with current: [MusicMood: Double]) -> Bool {
+        guard !windows.isEmpty else {
+            return false
+        }
+
+        let averaged = averageProbabilities(windows)
+        let distance = probabilityDistance(averaged, current)
+        let sorted = current.values.sorted(by: >)
+        let confidence = sorted.first ?? 0
+        let margin = confidence - (sorted.dropFirst().first ?? 0)
+
+        return distance >= moodChangeDistanceThreshold &&
+            confidence >= moodChangeConfidenceThreshold &&
+            margin >= moodChangeMarginThreshold
+    }
+
+    /// 두 확률 분포의 L1 거리를 계산합니다.
+    private func probabilityDistance(_ lhs: [MusicMood: Double], _ rhs: [MusicMood: Double]) -> Double {
+        MusicMood.allCases.reduce(0.0) { partial, mood in
+            partial + abs((lhs[mood] ?? 0.0) - (rhs[mood] ?? 0.0))
+        }
     }
 
     // MARK: - 내부 유틸리티
@@ -302,5 +354,10 @@ final class MusicMoodAnalyzer {
         #if DEBUG
         print("[MusicMoodAnalyzer] \(message)")
         #endif
+    }
+
+    /// 로그용 소수점 문자열을 만듭니다.
+    private func format(_ value: Double) -> String {
+        String(format: "%.3f", value)
     }
 }

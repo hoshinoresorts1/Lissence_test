@@ -27,7 +27,7 @@ struct QuickPhrase: Identifiable {
     let text: String
 
     static let defaults: [QuickPhrase] = [
-        .init(text: "저는 청각장애인입니다. 아이폰 마이크에 대고 천천히 이야기해주세요."),
+        .init(text: "저는 청각장애인입니다."),
         .init(text: "잠시만요"),
         .init(text: "다시 말씀해 주세요"),
         .init(text: "천천히 말씀해 주세요"),

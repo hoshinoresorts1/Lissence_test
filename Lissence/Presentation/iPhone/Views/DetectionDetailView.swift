@@ -29,6 +29,13 @@ struct DetectionDetailView: View {
             )
             .interactiveDismissDisabled() // 제스처로 끄기 방지 (버튼으로만 끄게 함)
         }
+        .overlay {
+            if viewModel.showAttentionPrompt {
+                attentionPromptOverlay
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.showAttentionPrompt)
         .onAppear { viewModel.onAppear() }
         .onDisappear { viewModel.onDisappear() }
     }
@@ -136,5 +143,56 @@ extension DetectionDetailView {
         }
         .padding(.horizontal, 30)
         .padding(.bottom, 30)
+    }
+
+    private var attentionPromptOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.24)
+                .ignoresSafeArea()
+
+            VStack(spacing: 18) {
+                Image(systemName: "person.wave.2.fill")
+                    .font(.system(size: 36, weight: .semibold))
+                    .foregroundColor(.blue)
+
+                Text(viewModel.attentionPromptMessage)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 12) {
+                    Button {
+                        viewModel.dismissAttentionPrompt()
+                    } label: {
+                        Text("아니오")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(Color.gray.opacity(0.16))
+                            .foregroundColor(.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    Button {
+                        viewModel.acceptAttentionPrompt()
+                    } label: {
+                        Text("네")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+            .padding(22)
+            .frame(maxWidth: 320)
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
+            .padding(.horizontal, 28)
+        }
     }
 }

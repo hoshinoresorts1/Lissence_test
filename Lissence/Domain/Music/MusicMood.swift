@@ -2,7 +2,7 @@
 
 import Foundation
 
-/// CoreML 모델의 Q1~Q4 라벨을 앱에서 쓰는 음악 무드로 매핑합니다.
+/// CoreML 모델의 Q1~Q5 라벨을 앱에서 쓰는 음악 무드로 매핑합니다.
 enum MusicMood: String, CaseIterable, Identifiable {
     /// 밝고 에너지 있는 무드입니다.
     case happy
@@ -15,6 +15,9 @@ enum MusicMood: String, CaseIterable, Identifiable {
 
     /// 안정적이고 편안한 무드입니다.
     case relaxed
+
+    /// 중립적이고 무표정한 무드입니다.
+    case neutral
 
     /// SwiftUI 목록 및 식별에 사용하는 값입니다.
     var id: String { rawValue }
@@ -30,6 +33,8 @@ enum MusicMood: String, CaseIterable, Identifiable {
             return "Q3"
         case .relaxed:
             return "Q4"
+        case .neutral:
+            return "Q5"
         }
     }
 
@@ -44,6 +49,8 @@ enum MusicMood: String, CaseIterable, Identifiable {
             return "슬픔"
         case .relaxed:
             return "편안함"
+        case .neutral:
+            return "무표정"
         }
     }
 
@@ -58,6 +65,8 @@ enum MusicMood: String, CaseIterable, Identifiable {
             return "cloud.rain.fill"
         case .relaxed:
             return "leaf.fill"
+        case .neutral:
+            return "face.dashed"
         }
     }
 
@@ -72,6 +81,8 @@ enum MusicMood: String, CaseIterable, Identifiable {
             return 2.0
         case .relaxed:
             return 3.0
+        case .neutral:
+            return 4.0
         }
     }
 
@@ -110,7 +121,13 @@ enum MusicMood: String, CaseIterable, Identifiable {
             "relax": .relaxed,
             "calm": .relaxed,
             "peaceful": .relaxed,
-            "chill": .relaxed
+            "chill": .relaxed,
+            "q5": .neutral,
+            "4": .neutral,
+            "neutral": .neutral,
+            "none": .neutral,
+            "flat": .neutral,
+            "ambiguous": .neutral
         ]
 
         guard let mood = aliases[normalized] else {

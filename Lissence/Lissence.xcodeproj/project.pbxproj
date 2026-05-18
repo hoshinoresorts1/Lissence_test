@@ -19,6 +19,7 @@
 		C34B94AD2F75072600ADDF8E /* HapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A62F75072600ADDF8E /* HapticController.swift */; };
 		C34B94AE2F75072600ADDF8E /* SoundClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A72F75072600ADDF8E /* SoundClassifier.swift */; };
 		C34B94AF2F75072600ADDF8E /* AttentionCallAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */; };
+		C34B94C52F764F1200ADDF8E /* AttentionHapticController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94C62F764F1200ADDF8E /* AttentionHapticController.swift */; };
 		C34B94B32F75072600ADDF8E /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94B42F75072600ADDF8E /* ChatMessage.swift */; };
 		C34B94B42F75072600ADDF9 /* TTSManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94B32F75072600ADDF9 /* TTSManager.swift */; };
 		C34B94B02F75072600ADDF8E /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34B94A92F75072600ADDF8E /* WatchContentView.swift */; };
@@ -85,6 +86,7 @@
 		C34B94A62F75072600ADDF8E /* HapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticController.swift; sourceTree = "<group>"; };
 		C34B94A72F75072600ADDF8E /* SoundClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundClassifier.swift; sourceTree = "<group>"; };
 		C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionCallAnalyzer.swift; sourceTree = "<group>"; };
+		C34B94C62F764F1200ADDF8E /* AttentionHapticController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionHapticController.swift; sourceTree = "<group>"; };
 		C34B94B42F75072600ADDF8E /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		C34B94B32F75072600ADDF9 /* TTSManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSManager.swift; sourceTree = "<group>"; };
 		C34B94A92F75072600ADDF8E /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 				C4A100002FA2000000000001 /* Music */,
 				C5B100002FA5000000000001 /* Bluetooth */,
 				C34B94A82F75072600ADDF8E /* AttentionCallAnalyzer.swift */,
+				C34B94C62F764F1200ADDF8E /* AttentionHapticController.swift */,
 				C34B94B42F75072600ADDF8E /* ChatMessage.swift */,
 				C34B94992F75072600ADDF8E /* SoundDetector.swift */,
 				C34B949A2F75072600ADDF8E /* SpeechManager.swift */,
@@ -451,6 +454,7 @@
 				C4A1001A2FA6000000000001 /* MusicHapticController.swift in Sources */,
 				C5B100112FA5000000000001 /* LissenceBLEConstants.swift in Sources */,
 				C5B100132FA5000000000001 /* LissenceBLEManager.swift in Sources */,
+				C34B94C52F764F1200ADDF8E /* AttentionHapticController.swift in Sources */,
 				C34B94AF2F75072600ADDF8E /* AttentionCallAnalyzer.swift in Sources */,
 				C306EAB72F6C0F3200AFE6F5 /* DangerSound.swift in Sources */,
 			);

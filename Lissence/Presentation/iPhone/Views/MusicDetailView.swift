@@ -23,7 +23,7 @@ struct MusicDetailView: View {
 
     var body: some View {
         ZStack {
-            SwiftUI.Color.black.ignoresSafeArea()
+            SwiftUI.Color(.systemBackground).ignoresSafeArea()
 
             if viewModel.isRunning {
                 MusicMoodParticleView(
@@ -49,8 +49,6 @@ struct MusicDetailView: View {
                     riveModel.view()
                         .frame(width: 320, height: 320)
                         .shadow(color: moodAccentColor.opacity(0.35), radius: 28)
-
-                    moodLabel
 
                     Button(action: { viewModel.toggleRunning() }) {
                         Label(
@@ -80,8 +78,14 @@ struct MusicDetailView: View {
                 .padding(.bottom, 30)
             }
         }
+        .onAppear {
+            viewModel.currentMood = .neutral
+            riveModel.setInput("mood", value: MusicMood.neutral.riveValue)
+            riveModel.setInput("intensity", value: 0.0)
+            riveModel.setInput("volume_spike", value: 0.0)
+        }
         .onChange(of: viewModel.currentMood) { _, newMood in
-            riveModel.setInput("mood", value: (newMood ?? .happy).riveValue)
+            riveModel.setInput("mood", value: (newMood ?? .neutral).riveValue)
         }
         .onChange(of: viewModel.visualIntensity) { _, newValue in
             riveModel.setInput("intensity", value: min(max(newValue, 0), 1))
@@ -105,7 +109,7 @@ struct MusicDetailView: View {
             Button(action: { currentPath = "home" }) {
                 Image(systemName: "house.fill")
                     .font(.title2)
-                    .foregroundColor(.white.opacity(0.72))
+                    .foregroundColor(.primary.opacity(0.72))
                     .frame(width: 44, height: 44)
             }
 
@@ -116,17 +120,9 @@ struct MusicDetailView: View {
         .overlay {
             Text("음악 모드")
                 .font(.system(size: 38, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
                 .offset(y: 124)
         }
-    }
-
-    /// 현재 무드만 간결하게 표시합니다.
-    private var moodLabel: some View {
-        Text(viewModel.currentMood?.displayName ?? "음악 분석 대기 중")
-            .font(.title3.weight(.semibold))
-            .foregroundColor(.white.opacity(0.92))
-            .padding(.horizontal, 24)
     }
 
     // MARK: - 상태 표시
@@ -142,8 +138,10 @@ struct MusicDetailView: View {
             return SwiftUI.Color.blue
         case .relaxed:
             return SwiftUI.Color.green
+        case .neutral:
+            return SwiftUI.Color.gray
         case nil:
-            return SwiftUI.Color.purple
+            return SwiftUI.Color.gray
         }
     }
 }

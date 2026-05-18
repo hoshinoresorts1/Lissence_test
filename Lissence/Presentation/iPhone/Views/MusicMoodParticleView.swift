@@ -174,6 +174,8 @@ private final class MusicParticleState {
             rate = 35
         case .relaxed:
             rate = 25
+        case .neutral:
+            rate = 22
         case nil:
             rate = 36
         }
@@ -239,6 +241,13 @@ private final class MusicParticleState {
             lifetime = .random(in: 3.0...5.2)
             blur = 2.0
             baseSize = .random(in: 8...16)
+        case .neutral:
+            origin = CGPoint(x: .random(in: 0...size.width), y: .random(in: 0...size.height))
+            velocity = CGVector(dx: .random(in: -12...12), dy: .random(in: -18...8))
+            gravity = -3
+            lifetime = .random(in: 3.5...5.5)
+            blur = 2.8
+            baseSize = .random(in: 5...11)
         case nil:
             lifetime = .random(in: 1.8...3.0)
             blur = 1.3
@@ -364,6 +373,12 @@ private final class MusicParticleState {
                 Color(red: 0.50, green: 0.95, blue: 0.75),
                 Color(red: 0.45, green: 0.85, blue: 0.95),
                 Color(red: 0.70, green: 0.95, blue: 0.55)
+            ]
+        case .neutral:
+            return [
+                Color(red: 0.55, green: 0.55, blue: 0.62),
+                Color(red: 0.40, green: 0.42, blue: 0.55),
+                Color(red: 0.65, green: 0.60, blue: 0.75)
             ]
         case nil:
             return [

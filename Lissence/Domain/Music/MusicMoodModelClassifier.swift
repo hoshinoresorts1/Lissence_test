@@ -110,15 +110,15 @@ final class MusicMoodModelClassifier {
         return nil
     }
 
-    /// 모델 출력이 MultiArray일 때 Q1~Q4 확률로 해석합니다.
+    /// 모델 출력이 MultiArray일 때 학습 stats의 라벨 순서로 해석합니다.
     private func readMultiArrayOutput(_ output: MLFeatureProvider) -> MusicMoodClassifierResult? {
         for name in output.featureNames {
             guard let array = output.featureValue(for: name)?.multiArrayValue else {
                 continue
             }
 
-            let count = min(4, array.count)
-            guard count == 4 else {
+            let count = min(fallbackLabels.count, array.count)
+            guard count == fallbackLabels.count else {
                 continue
             }
 
@@ -157,7 +157,7 @@ final class MusicMoodModelClassifier {
     /// 학습 stats의 label 순서를 fallback 라벨로 사용합니다.
     private static func resolveFallbackLabels() -> [String] {
         let labels = TrainingStats.load().labelNames
-        return labels.count >= 4 ? Array(labels.prefix(4)) : ["Q1", "Q2", "Q3", "Q4"]
+        return labels.count >= 4 ? labels : ["Q1", "Q2", "Q3", "Q4", "Q5"]
     }
 
     /// 새 모델이 음악모드 extractor 출력과 호환되는지 확인합니다.

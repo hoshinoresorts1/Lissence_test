@@ -14,6 +14,7 @@ enum AttentionAlertLevel: String {
 struct AttentionCallAnalysis {
     let transcript: String
     let candidateDetected: Bool
+    let recentCandidateDetected: Bool
     let repeatCount: Int
     let emergencyKeywordDetected: Bool
     let score: Int
@@ -25,35 +26,60 @@ final class AttentionCallAnalyzer {
     private let candidateKeywords = ["저기요", "안녕하세요"]
     private let emergencyKeywords = ["조심", "위험", "비켜요", "차", "뒤에", "피해요", "멈춰요", "조심하세요"]
     private let repeatWindowSeconds: TimeInterval = 2.0
-    private let candidateContextSeconds: TimeInterval = 5.0
+    private let candidateContextSeconds: TimeInterval = 3.0
 
     private var candidateTimestamps: [Date] = []
     private var lastCandidateOccurrenceCount = 0
+    private var lastCandidateDetectedAt: Date?
 
-    /// transcript를 분석해 호출어 알림 단계를 반환합니다.
+    /// 누적 transcript를 분석해 호출어 알림 단계를 반환합니다.
     func analyze(transcript: String, now: Date = Date()) -> AttentionCallAnalysis {
+        analyze(transcript: transcript, now: now, treatsTranscriptAsNewSegment: false)
+    }
+
+    /// 새로 추가된 발화 조각을 분석해 호출어 알림 단계를 반환합니다.
+    func analyzeSegment(transcript: String, now: Date = Date()) -> AttentionCallAnalysis {
+        analyze(transcript: transcript, now: now, treatsTranscriptAsNewSegment: true)
+    }
+
+    private func analyze(
+        transcript: String,
+        now: Date = Date(),
+        treatsTranscriptAsNewSegment: Bool
+    ) -> AttentionCallAnalysis {
         let trimmedTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         let candidateOccurrenceCount = countOccurrences(in: trimmedTranscript, keywords: candidateKeywords)
-        let newCandidateCount = max(candidateOccurrenceCount - lastCandidateOccurrenceCount, 0)
+        let newCandidateCount: Int
 
-        if candidateOccurrenceCount < lastCandidateOccurrenceCount || trimmedTranscript.isEmpty {
-            lastCandidateOccurrenceCount = candidateOccurrenceCount
+        if treatsTranscriptAsNewSegment {
+            newCandidateCount = candidateOccurrenceCount
         } else {
-            lastCandidateOccurrenceCount = max(lastCandidateOccurrenceCount, candidateOccurrenceCount)
+            newCandidateCount = max(candidateOccurrenceCount - lastCandidateOccurrenceCount, 0)
+        }
+
+        if !treatsTranscriptAsNewSegment {
+            if candidateOccurrenceCount < lastCandidateOccurrenceCount || trimmedTranscript.isEmpty {
+                lastCandidateOccurrenceCount = candidateOccurrenceCount
+            } else {
+                lastCandidateOccurrenceCount = max(lastCandidateOccurrenceCount, candidateOccurrenceCount)
+            }
         }
 
         if newCandidateCount > 0 {
             candidateTimestamps.append(contentsOf: Array(repeating: now, count: newCandidateCount))
+            lastCandidateDetectedAt = now
         }
 
         candidateTimestamps.removeAll { now.timeIntervalSince($0) > candidateContextSeconds }
 
+        let hasCurrentCandidate = candidateOccurrenceCount > 0
+        let hasRecentCandidate = lastCandidateDetectedAt.map { now.timeIntervalSince($0) <= candidateContextSeconds } ?? false
         let repeatCount = candidateTimestamps.filter { now.timeIntervalSince($0) <= repeatWindowSeconds }.count
-        let hasCandidateContext = !candidateTimestamps.isEmpty
+        let hasCandidateContext = hasCurrentCandidate || hasRecentCandidate
         let emergencyDetected = hasCandidateContext && emergencyKeywords.contains { trimmedTranscript.contains($0) }
 
         var score = 0
-        if hasCandidateContext {
+        if hasCurrentCandidate || emergencyDetected {
             score += 1
         }
         if repeatCount >= 2 {
@@ -67,7 +93,7 @@ final class AttentionCallAnalyzer {
         // TODO: 거리 변화 조건은 마이크 amplitude trend 신뢰도 검증 후 별도 옵션으로 추가합니다.
 
         let alertLevel: AttentionAlertLevel
-        if !hasCandidateContext {
+        if !hasCurrentCandidate && !emergencyDetected {
             alertLevel = .none
         } else if emergencyDetected || score >= 6 {
             alertLevel = .strongAlert
@@ -80,6 +106,7 @@ final class AttentionCallAnalyzer {
         let analysis = AttentionCallAnalysis(
             transcript: trimmedTranscript,
             candidateDetected: hasCandidateContext,
+            recentCandidateDetected: hasRecentCandidate,
             repeatCount: repeatCount,
             emergencyKeywordDetected: emergencyDetected,
             score: score,
@@ -94,6 +121,7 @@ final class AttentionCallAnalyzer {
     func reset() {
         candidateTimestamps.removeAll()
         lastCandidateOccurrenceCount = 0
+        lastCandidateDetectedAt = nil
     }
 
     private func countOccurrences(in text: String, keywords: [String]) -> Int {
@@ -105,7 +133,7 @@ final class AttentionCallAnalyzer {
     private func debugLog(_ analysis: AttentionCallAnalysis) {
         #if DEBUG
         print(
-            "[AttentionCall] transcript=\(analysis.transcript), candidate=\(analysis.candidateDetected), repeatCount=\(analysis.repeatCount), emergency=\(analysis.emergencyKeywordDetected), score=\(analysis.score), alertLevel=\(analysis.alertLevel.rawValue)"
+            "[AttentionCall] transcript=\(analysis.transcript), candidate=\(analysis.candidateDetected), recentCandidate=\(analysis.recentCandidateDetected), repeatCount=\(analysis.repeatCount), emergency=\(analysis.emergencyKeywordDetected), score=\(analysis.score), alertLevel=\(analysis.alertLevel.rawValue)"
         )
         #endif
     }

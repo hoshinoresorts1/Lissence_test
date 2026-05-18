@@ -15,7 +15,7 @@ final class MusicViewModel: ObservableObject {
     @Published var statusText = "음악 모드 대기 중"
 
     /// 최근 분석된 음악 무드입니다.
-    @Published var currentMood: MusicMood?
+    @Published var currentMood: MusicMood? = .neutral
 
     /// 최근 분석 결과의 신뢰도입니다.
     @Published var confidence: Double = 0
@@ -128,6 +128,7 @@ final class MusicViewModel: ObservableObject {
             return
         }
 
+        currentMood = .neutral
         isRunning = true
         statusText = "음악 무드 분석 시작 중"
         hapticController.start()
@@ -141,7 +142,9 @@ final class MusicViewModel: ObservableObject {
         }
 
         analyzer.stop()
-        hapticController.stop()
+        currentMood = .neutral
+        confidence = 0
+        probabilities = Dictionary(uniqueKeysWithValues: MusicMood.allCases.map { ($0, 0.0) })
         audioEnergy = 0
         audioPeak = 0
         visualIntensity = 0
@@ -150,7 +153,16 @@ final class MusicViewModel: ObservableObject {
         visualTreble = 0
         previousAudioEnergy = 0
         resetBeatState()
+        hapticController.play(style: .happyContinuous, intensity: 0.35, sharpness: 0.25)
         isRunning = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
+            guard let self, !self.isRunning else {
+                return
+            }
+
+            self.hapticController.stop()
+        }
     }
 
     /// 시작/중지 버튼 액션을 처리합니다.
@@ -296,7 +308,7 @@ extension MusicViewModel: MusicMoodAnalyzerDelegate {
         var style: MusicHapticStyle = .tap
 
         switch currentMood ?? .happy {
-        case .happy:
+        case .happy, .neutral:
             intensity *= 0.92
             sharpness *= 0.88
             if veryStrongHit && strongBassAccent && relativeEnergy > 1.36 && relativePeak > 1.18 {
