@@ -165,7 +165,7 @@ final class LissenceBLEManager: NSObject {
                 return
             }
 
-            let ts = self.esp32TimestampMillis(for: classifiedAt)
+            let ts = self.hapticTimestampMillis(for: classifiedAt)
             let win = Int(LissenceBLEConstants.analysisWindowSeconds * 1000)
             let payload = #"{"type":"haptic","pattern":"\#(pattern)","ts":\#(ts),"win":\#(win)}"#
 
@@ -252,14 +252,25 @@ final class LissenceBLEManager: NSObject {
         guard let data = text.data(using: .utf8),
               let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               payload["type"] as? String == "clock_pong",
-              let espTs = payload["esp_ts"] as? Double else {
+              let espTsNumber = payload["esp_ts"] as? NSNumber else {
             return
         }
 
+        let espTs = espTsNumber.doubleValue
         let nowTs = Date().timeIntervalSince1970 * 1000
         let offsetSeconds = (espTs - nowTs) / 1000
         clockOffsetSeconds = offsetSeconds
         print("⏰ [LissenceBLE] clock_pong: esp_ts=\(espTs), now=\(nowTs), offset=\(String(format: "%.3f", offsetSeconds))s")
+    }
+
+    /// ESP32가 clock_ping 이후 경과 시간축으로 haptic event를 매칭할 수 있도록 timestamp(ms)를 계산합니다.
+    private func hapticTimestampMillis(for date: Date) -> Int64 {
+        if let lastClockPingAt {
+            let elapsedMs = date.timeIntervalSince(lastClockPingAt) * 1000
+            return Int64(elapsedMs)
+        }
+
+        return esp32TimestampMillis(for: date)
     }
 
     /// iPhone Date를 ESP32 윈도 매칭용 timestamp(ms) 로 변환합니다. clockOffset이 있으면 적용합니다.

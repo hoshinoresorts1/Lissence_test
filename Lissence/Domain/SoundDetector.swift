@@ -12,6 +12,8 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private var analyzer: SNAudioStreamAnalyzer?
     private let analysisQueue = DispatchQueue(label: "com.Lissence.AnalysisQueue")
     private var isStartingDetection = false
+    private var firstSampleTime: AVAudioFramePosition?
+    private var firstSampleTimestampMs: Double = 0
     
     // UI에서 현재 어떤 소리가 들리는지 보여줄 변수
     @Published var statusText: String = "주변 소리 분석 중..."
@@ -52,6 +54,8 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         lastDetectionConfidence = nil
         lastAnalyzerClassificationIdentifier = "-"
         lastAnalyzerClassificationConfidence = nil
+        firstSampleTime = nil
+        firstSampleTimestampMs = 0
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -77,8 +81,15 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
             
             // 4. 마이크 입력을 분석기로 전달 (Tap 설치)
             inputNode.installTap(onBus: 0, bufferSize: 8000, format: recordingFormat) { [weak self] buffer, time in
-                self?.analysisQueue.async {
-                    self?.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
+                guard let self else { return }
+
+                if self.firstSampleTime == nil {
+                    self.firstSampleTime = time.sampleTime
+                    self.firstSampleTimestampMs = Date().timeIntervalSince1970 * 1000
+                }
+
+                self.analysisQueue.async {
+                    self.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime)
                 }
             }
             
@@ -115,7 +126,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     /// 소리 분석 처리 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
-        let classifiedAt = Date()
+        let classifiedAt = preciseClassificationDate(for: result)
 
         // 1. 신뢰도 순 정렬 및 임계값 체크
         let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
@@ -144,6 +155,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                     self.lastDetectedDangerSound = sound
                     self.lastDetectionConfidence = classification.confidence
                     print("🚨 [SoundDetector] DANGER detected: \(sound.rawValue) (confidence=\(String(format: "%.3f", classification.confidence)))")
+                    print("🎯 [SoundDetector] precise timestamp ms=\(Int64(classifiedAt.timeIntervalSince1970 * 1000))")
                     self.sendDangerAlert(sound: sound, classifiedAt: classifiedAt)
                 }
                 return
@@ -159,6 +171,20 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     /// 소리 분석 요청 완료를 로그로 남깁니다.
     func requestDidComplete(_ request: SNRequest) {
         print("[SoundDetector] requestDidComplete")
+    }
+
+    /// SoundAnalysis 결과가 가리키는 실제 분석 window 시작 시각을 Date 기준으로 역산합니다.
+    private func preciseClassificationDate(for result: SNClassificationResult) -> Date {
+        guard let firstSampleTime,
+              result.timeRange.start.timescale > 0 else {
+            return Date()
+        }
+
+        let sampleOffset = Double(result.timeRange.start.value - firstSampleTime)
+        let audioOffsetMs = sampleOffset / Double(result.timeRange.start.timescale) * 1000
+        let timestampMs = firstSampleTimestampMs + audioOffsetMs
+
+        return Date(timeIntervalSince1970: timestampMs / 1000)
     }
 
     /// 위험 소리 분류 결과를 Apple Watch와 ESP32 양쪽으로 전달합니다.
