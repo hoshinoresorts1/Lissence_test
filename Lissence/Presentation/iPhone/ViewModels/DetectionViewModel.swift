@@ -59,6 +59,15 @@ class DetectionViewModel: NSObject, ObservableObject {
     /// 반복 호출 softAlert에서 표시할 플로팅 팝업 문구입니다.
     @Published var attentionPromptMessage: String = "누군가가 부릅니다. 음성 인식 기능을 켤까요?"
 
+    /// 1회 호출(displayOnly)의 화면 표시 여부입니다. 위험음 감지와 BLE 하드웨어 알림에는 적용하지 않습니다.
+    @Published var isSingleCallAlertEnabled: Bool = true
+
+    /// 반복 호출(softAlert)의 화면/햅틱/팝업 활성화 여부입니다.
+    @Published var isRepeatedCallAlertEnabled: Bool = true
+
+    /// 긴급 호출(strongAlert)의 iPhone 화면/햅틱 활성화 여부입니다. Watch 전송은 항상 유지합니다.
+    @Published var isEmergencyCallAlertEnabled: Bool = true
+
     let quickPhrases = QuickPhrase.defaults
     let inputCharLimit = 200
     let defaultTTSGuide = "저는 청각장애인입니다."
@@ -184,20 +193,24 @@ class DetectionViewModel: NSObject, ObservableObject {
         case .none:
             break
         case .displayOnly:
-            showAttentionCall(title: "호출어 후보 감지", isDanger: false)
+            if isSingleCallAlertEnabled {
+                showAttentionCall(title: "호출어 후보 감지", isDanger: false)
+            }
         case .softAlert:
-            showAttentionCall(title: "호출 감지", isDanger: false)
+            if isRepeatedCallAlertEnabled {
+                showAttentionCall(title: "호출 감지", isDanger: false)
+            }
             if shouldEmitAttentionAlert(level: .softAlert, analysis: analysis) {
-                print("📳 [AttentionHaptic] requested level=softAlert")
-                playAttentionHaptic(level: .softAlert)
-                presentAttentionPromptIfNeeded()
+                playRepeatedCallHapticIfAllowed()
+                presentRepeatedCallPromptIfAllowed()
             }
             // TODO: Watch softAlert 별도 햅틱은 MessageData alertLevel 확장 후 연결합니다.
         case .strongAlert:
-            showAttentionCall(title: "긴급 호출 감지!", isDanger: true)
+            if isEmergencyCallAlertEnabled {
+                showAttentionCall(title: "긴급 호출 감지!", isDanger: true)
+            }
             if shouldEmitAttentionAlert(level: .strongAlert, analysis: analysis) {
-                print("📳 [AttentionHaptic] requested level=strongAlert")
-                playAttentionHaptic(level: .strongAlert)
+                playEmergencyCallHapticIfAllowed()
                 sendStrongAttentionAlertToWatch(transcript: analysis.transcript)
                 attentionCallAnalyzer.reset()
             }
@@ -268,7 +281,28 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
     }
 
-    /// 호출 감지 단계에 맞는 iPhone 햅틱을 재생합니다.
+    /// 반복 호출 단계에 맞는 iPhone 햅틱을 재생합니다.
+    private func playRepeatedCallHapticIfAllowed() {
+        guard isRepeatedCallAlertEnabled else {
+            print("📳 [AttentionHaptic] skipped level=softAlert, enabled=false")
+            return
+        }
+
+        print("📳 [AttentionHaptic] requested level=softAlert, resolved=softAlert, enabled=true")
+        playAttentionHaptic(level: .softAlert)
+    }
+
+    /// 긴급 호출 단계에 맞는 iPhone 햅틱을 재생합니다. Watch 전송 여부에는 영향을 주지 않습니다.
+    private func playEmergencyCallHapticIfAllowed() {
+        guard isEmergencyCallAlertEnabled else {
+            print("📳 [AttentionHaptic] skipped level=strongAlert, enabled=false")
+            return
+        }
+
+        print("📳 [AttentionHaptic] requested level=strongAlert, resolved=strongAlert, enabled=true")
+        playAttentionHaptic(level: .strongAlert)
+    }
+
     private func playAttentionHaptic(level: AttentionAlertLevel) {
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self] in
@@ -391,7 +425,12 @@ class DetectionViewModel: NSObject, ObservableObject {
     }
 
     /// 반복 호출 softAlert에서 음성인식 UI 진입 제안 팝업을 중복 없이 표시합니다.
-    private func presentAttentionPromptIfNeeded() {
+    private func presentRepeatedCallPromptIfAllowed() {
+        guard isRepeatedCallAlertEnabled else {
+            showAttentionPrompt = false
+            return
+        }
+
         guard !isVoiceOn, !showAttentionPrompt else {
             return
         }

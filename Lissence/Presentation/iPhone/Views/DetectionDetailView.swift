@@ -13,6 +13,8 @@ struct DetectionDetailView: View {
 
             bleIndicatorView
 
+            attentionCallControlView
+
             Spacer()
 
             contentView
@@ -102,6 +104,61 @@ extension DetectionDetailView {
         .cornerRadius(8)
         .padding(.horizontal)
         .animation(.easeInOut(duration: 0.2), value: viewModel.isBLEConnected)
+    }
+
+    private var attentionCallControlView: some View {
+        HStack(spacing: 8) {
+            attentionToggleItem(
+                title: "1회호출",
+                isOn: $viewModel.isSingleCallAlertEnabled,
+                tint: .blue
+            )
+
+            attentionToggleItem(
+                title: "반복호출",
+                isOn: $viewModel.isRepeatedCallAlertEnabled,
+                tint: .blue
+            )
+
+            attentionToggleItem(
+                title: "긴급호출",
+                isOn: $viewModel.isEmergencyCallAlertEnabled,
+                tint: .red
+            )
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isSingleCallAlertEnabled)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isRepeatedCallAlertEnabled)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isEmergencyCallAlertEnabled)
+    }
+
+    private func attentionToggleItem(
+        title: String,
+        isOn: Binding<Bool>,
+        tint: Color
+    ) -> some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .tint(tint)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 58)
+        .padding(.horizontal, 6)
+        .background(tint.opacity(isOn.wrappedValue ? 0.10 : 0.06))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(tint.opacity(isOn.wrappedValue ? 0.28 : 0.14), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     // 2. 메인 컨텐츠: 소리 감지 결과 표시
