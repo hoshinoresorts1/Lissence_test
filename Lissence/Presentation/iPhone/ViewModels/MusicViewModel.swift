@@ -366,7 +366,7 @@ extension MusicViewModel: MusicMoodAnalyzerDelegate {
             bassBoost > 1.15 &&
             now - lastRisingTrigger > risingCooldown
 
-        if risingCondition && (currentMood == .happy || currentMood == .angry) {
+        if risingCondition && (currentMood == .happy || currentMood == .neutral || currentMood == .angry) {
             lastRisingTrigger = now
 
             if veryStrongHit || strongBassAccent {

@@ -314,26 +314,48 @@ final class MusicMoodAnalyzer {
 
     /// 새 window가 이전 평균과 충분히 다르면 평균 버퍼를 비워 반응 지연을 줄입니다.
     private func shouldResetAverage(with current: [MusicMood: Double]) -> Bool {
-        guard !windows.isEmpty else {
+        guard windows.count >= 2 else {
             return false
         }
 
-        let averaged = averageProbabilities(windows)
-        let distance = probabilityDistance(averaged, current)
-        let sorted = current.values.sorted(by: >)
-        let confidence = sorted.first ?? 0
-        let margin = confidence - (sorted.dropFirst().first ?? 0)
+        let previous = averageProbabilities(windows)
+        let previousSorted = MusicMood.allCases
+            .map { ($0, previous[$0] ?? 0.0) }
+            .sorted { $0.1 > $1.1 }
+        let currentSorted = MusicMood.allCases
+            .map { ($0, current[$0] ?? 0.0) }
+            .sorted { $0.1 > $1.1 }
 
-        return distance >= moodChangeDistanceThreshold &&
-            confidence >= moodChangeConfidenceThreshold &&
-            margin >= moodChangeMarginThreshold
+        guard let previousTop = previousSorted.first,
+              let currentTop = currentSorted.first else {
+            return false
+        }
+
+        let currentSecond = currentSorted.dropFirst().first?.1 ?? 0.0
+        let currentMargin = currentTop.1 - currentSecond
+
+        guard previousTop.0 != currentTop.0 else {
+            return false
+        }
+
+        guard currentTop.1 >= moodChangeConfidenceThreshold else {
+            return false
+        }
+
+        guard currentMargin >= moodChangeMarginThreshold else {
+            return false
+        }
+
+        return probabilityDistance(previous, current) >= moodChangeDistanceThreshold
     }
 
     /// 두 확률 분포의 L1 거리를 계산합니다.
     private func probabilityDistance(_ lhs: [MusicMood: Double], _ rhs: [MusicMood: Double]) -> Double {
-        MusicMood.allCases.reduce(0.0) { partial, mood in
+        let total = MusicMood.allCases.reduce(0.0) { partial, mood in
             partial + abs((lhs[mood] ?? 0.0) - (rhs[mood] ?? 0.0))
         }
+
+        return total / 2.0
     }
 
     // MARK: - 내부 유틸리티
