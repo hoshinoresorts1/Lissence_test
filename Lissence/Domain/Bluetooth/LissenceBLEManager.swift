@@ -57,6 +57,9 @@ final class LissenceBLEManager: NSObject {
     /// 문자열 송수신에 사용하는 ESP32 Characteristic입니다.
     private var messageCharacteristic: CBCharacteristic?
 
+    /// ESP32 notify/indicate 수신에 사용하는 Characteristic입니다. write characteristic과 분리될 수 있습니다.
+    private var notifyCharacteristic: CBCharacteristic?
+
     /// Service UUID 스캔 후 이름 기반 fallback 스캔으로 전환했는지 여부입니다.
     private var isNameFallbackScan = false
 
@@ -68,6 +71,9 @@ final class LissenceBLEManager: NSObject {
 
     /// 클록 동기 ping을 보낸 시각입니다. pong 미수신 시 fallback latency를 사용합니다.
     private var lastClockPingAt: Date?
+
+    /// ESP32로 보낸 clock_ping의 iPhone epoch timestamp(ms)입니다.
+    private var lastClockPingSentMillis: Double?
 
     /// 클록 동기 성공 시 iPhone Date와 ESP32 시각의 추정 차이(초)입니다. nil이면 fallback latency를 사용합니다.
     private var clockOffsetSeconds: TimeInterval?
@@ -127,6 +133,7 @@ final class LissenceBLEManager: NSObject {
                 self.centralManager.cancelPeripheralConnection(connectedPeripheral)
             }
             self.messageCharacteristic = nil
+            self.notifyCharacteristic = nil
             self.connectedPeripheral = nil
             self.notifyConnection(false)
             self.notifyStatus("BLE 연결 해제")
@@ -170,10 +177,11 @@ final class LissenceBLEManager: NSObject {
             let ts = self.esp32TimestampMillis(for: classifiedAt)
             let win = Int(LissenceBLEConstants.analysisWindowSeconds * 1000)
             let payload = #"{"type":"haptic","pattern":"\#(pattern)","ts":\#(ts),"win":\#(win)}"#
+            let timestampMode = self.clockOffsetSeconds == nil ? "fallback" : "precise"
 
             self.lastHapticWriteAt = now
             self.write(payload, peripheral: connectedPeripheral, characteristic: messageCharacteristic)
-            print("📡 [BLEHaptic] write pattern=\(pattern)")
+            print("📡 [BLEHaptic] write pattern=\(pattern), ts=\(ts), win=\(win), mode=\(timestampMode)")
         }
 
         return true
@@ -236,8 +244,9 @@ final class LissenceBLEManager: NSObject {
     private func sendClockPing() {
         let now = Date()
         lastClockPingAt = now
-        let ts = esp32TimestampMillis(for: now)
-        write(#"{"type":"clock_ping","ts":\#(ts)}"#)
+        let phoneSentMillis = phoneEpochMillis(for: now)
+        lastClockPingSentMillis = phoneSentMillis
+        write(#"{"type":"clock_ping","ts":\#(Int64(phoneSentMillis))}"#)
 
         bluetoothQueue.asyncAfter(deadline: .now() + LissenceBLEConstants.clockSyncTimeoutSeconds) { [weak self] in
             guard let self else { return }
@@ -252,27 +261,123 @@ final class LissenceBLEManager: NSObject {
     /// 수신 문자열이 clock_pong이면 offset을 계산해 저장합니다.
     private func handleClockPongIfNeeded(_ text: String) {
         guard let data = text.data(using: .utf8),
-              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              payload["type"] as? String == "clock_pong",
-              let espTsNumber = payload["esp_ts"] as? NSNumber else {
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return
         }
 
-        let espTs = espTsNumber.doubleValue
-        let nowTs = Date().timeIntervalSince1970 * 1000
-        let offsetSeconds = (espTs - nowTs) / 1000
+        guard let type = payload["type"] as? String,
+              isClockPongType(type) else {
+            return
+        }
+
+        print("📥 [LissenceBLE] clock_pong received raw=\(text)")
+
+        guard let espTs = firstTimestamp(
+            in: payload,
+            keys: ["esp_ts", "espTs", "espMillis", "esp_millis", "server_ts", "t2", "t1", "ts"]
+        ) else {
+            print("⚠️ [LissenceBLE] clock_pong parse failed: missing esp timestamp raw=\(text)")
+            return
+        }
+
+        guard let phoneTimestamp = clockPongPhoneSentMillis(from: payload) else {
+            print("⚠️ [LissenceBLE] clock_pong parse failed: invalid phone timestamp raw=\(text)")
+            return
+        }
+
+        let phoneSentMillis = phoneTimestamp.value
+        let nowMillis = phoneEpochMillis(for: Date())
+        let rttMillis = max(0, nowMillis - phoneSentMillis)
+        let estimatedPhoneAtESPResponseMillis = phoneSentMillis + (rttMillis / 2)
+        let offsetMillis = espTs - estimatedPhoneAtESPResponseMillis
+        let offsetSeconds = offsetMillis / 1000
+
         clockOffsetSeconds = offsetSeconds
-        print("⏰ [LissenceBLE] clock_pong: esp_ts=\(espTs), now=\(nowTs), offset=\(String(format: "%.3f", offsetSeconds))s")
+        print(
+            "⏰ [LissenceBLE] clock sync success: "
+            + "phoneSent=\(Int64(phoneSentMillis)), "
+            + "phoneSource=\(phoneTimestamp.source), "
+            + "espTs=\(Int64(espTs)), "
+            + "rtt=\(String(format: "%.1f", rttMillis))ms, "
+            + "offset=\(String(format: "%.3f", offsetSeconds))s"
+        )
+        print("⏰ [LissenceBLE] precise timestamp enabled")
     }
 
     /// iPhone Date를 ESP32 윈도 매칭용 timestamp(ms) 로 변환합니다. clockOffset이 있으면 적용합니다.
     private func esp32TimestampMillis(for date: Date) -> Int64 {
-        let base = date.timeIntervalSince1970 * 1000
+        let base = phoneEpochMillis(for: date)
         if let offset = clockOffsetSeconds {
             return Int64(base + offset * 1000)
         }
         // 클록 미동기 상태에서는 fallback latency를 빼서 ESP32가 과거 윈도와 매칭하도록 합니다.
         return Int64(base - LissenceBLEConstants.bleEstimatedLatencySeconds * 1000)
+    }
+
+    private func phoneEpochMillis(for date: Date) -> Double {
+        date.timeIntervalSince1970 * 1000
+    }
+
+    private func isClockPongType(_ type: String) -> Bool {
+        ["clock_pong", "pong", "clockPong"].contains(type)
+    }
+
+    private func clockPongPhoneSentMillis(from payload: [String: Any]) -> (value: Double, source: String)? {
+        if let timestamp = firstTimestamp(
+            in: payload,
+            keys: ["phone_ts", "phoneTs", "client_ts", "clientTs", "t0"]
+        ) {
+            return (timestamp, "payload")
+        }
+
+        if let lastClockPingSentMillis {
+            return (lastClockPingSentMillis, "pending clock_ping")
+        }
+
+        if let lastClockPingAt {
+            return (phoneEpochMillis(for: lastClockPingAt), "lastClockPingAt")
+        }
+
+        return nil
+    }
+
+    private func firstTimestamp(in payload: [String: Any], keys: [String]) -> Double? {
+        for key in keys {
+            if let timestamp = timestampValue(payload[key]) {
+                return timestamp
+            }
+        }
+
+        return nil
+    }
+
+    private func timestampValue(_ value: Any?) -> Double? {
+        switch value {
+        case let number as NSNumber:
+            return normalizeTimestampUnit(number.doubleValue)
+        case let int as Int:
+            return normalizeTimestampUnit(Double(int))
+        case let int64 as Int64:
+            return normalizeTimestampUnit(Double(int64))
+        case let double as Double:
+            return normalizeTimestampUnit(double)
+        case let string as String:
+            guard let double = Double(string.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+                return nil
+            }
+            return normalizeTimestampUnit(double)
+        default:
+            return nil
+        }
+    }
+
+    private func normalizeTimestampUnit(_ value: Double) -> Double {
+        // Epoch seconds are around 1e9. Epoch millis and ESP32 millis should already be millisecond-scale.
+        if value > 1_000_000_000, value < 10_000_000_000 {
+            return value * 1000
+        }
+
+        return value
     }
 
     // MARK: - 스캔 처리
@@ -303,8 +408,10 @@ final class LissenceBLEManager: NSObject {
     private func resetConnectionStateForNewScan() {
         centralManager.stopScan()
         messageCharacteristic = nil
+        notifyCharacteristic = nil
         clockOffsetSeconds = nil
         lastClockPingAt = nil
+        lastClockPingSentMillis = nil
 
         if let connectedPeripheral {
             centralManager.cancelPeripheralConnection(connectedPeripheral)
@@ -353,19 +460,64 @@ final class LissenceBLEManager: NSObject {
     /// 대상 service에서 문자열 송수신 characteristic을 탐색합니다.
     private func discoverMessageCharacteristic(in service: CBService, peripheral: CBPeripheral) {
         notifyStatus("BLE Characteristic 탐색 중")
-        peripheral.discoverCharacteristics([LissenceBLEConstants.characteristicUUID], for: service)
+        peripheral.discoverCharacteristics(nil, for: service)
     }
 
-    /// 찾은 characteristic의 notify/read 기능을 활성화합니다.
-    private func configureMessageCharacteristic(_ characteristic: CBCharacteristic, peripheral: CBPeripheral) {
-        messageCharacteristic = characteristic
-
-        if characteristic.properties.contains(.notify) {
-            peripheral.setNotifyValue(true, for: characteristic)
+    /// 찾은 characteristic 중 write와 notify 경로를 설정합니다.
+    private func configureMessageCharacteristics(_ characteristics: [CBCharacteristic], peripheral: CBPeripheral) {
+        let preferredCharacteristic = characteristics.first { $0.uuid == LissenceBLEConstants.characteristicUUID }
+        let writeCandidates = characteristics.filter {
+            $0.properties.contains(.write) || $0.properties.contains(.writeWithoutResponse)
+        }
+        let notifyCandidates = characteristics.filter {
+            $0.properties.contains(.notify) || $0.properties.contains(.indicate)
         }
 
-        if characteristic.properties.contains(.read) {
-            peripheral.readValue(for: characteristic)
+        messageCharacteristic = preferredCharacteristic.flatMap { characteristic in
+            writeCandidates.first { $0.uuid == characteristic.uuid }
+        } ?? writeCandidates.first
+
+        notifyCharacteristic = preferredCharacteristic.flatMap { characteristic in
+            notifyCandidates.first { $0.uuid == characteristic.uuid }
+        } ?? notifyCandidates.first
+
+        for characteristic in characteristics {
+            print(
+                "📡 [LissenceBLE] discovered characteristic="
+                + "\(characteristic.uuid.uuidString) properties=\(propertiesText(for: characteristic))"
+            )
+
+            if characteristic.properties.contains(.notify) || characteristic.properties.contains(.indicate) {
+                peripheral.setNotifyValue(true, for: characteristic)
+                print(
+                    "📡 [LissenceBLE] setNotifyValue true for characteristic="
+                    + "\(characteristic.uuid.uuidString) properties=\(propertiesText(for: characteristic))"
+                )
+            }
+
+            if characteristic.properties.contains(.read) {
+                peripheral.readValue(for: characteristic)
+            }
+        }
+
+        guard let messageCharacteristic else {
+            notifyStatus("BLE write Characteristic을 찾지 못했습니다.")
+            print("📡 [LissenceBLE] write characteristic unavailable")
+            return
+        }
+
+        print(
+            "📡 [LissenceBLE] write characteristic="
+            + "\(messageCharacteristic.uuid.uuidString) properties=\(propertiesText(for: messageCharacteristic))"
+        )
+
+        if let notifyCharacteristic {
+            print(
+                "📡 [LissenceBLE] notify characteristic="
+                + "\(notifyCharacteristic.uuid.uuidString) properties=\(propertiesText(for: notifyCharacteristic))"
+            )
+        } else {
+            print("📡 [LissenceBLE] notify characteristic unavailable")
         }
 
         notifyStatus("BLE 연결 준비 완료")
@@ -377,17 +529,19 @@ final class LissenceBLEManager: NSObject {
     // MARK: - 메시지 처리
 
     /// Characteristic 값에서 UTF-8 문자열을 추출해 delegate로 전달합니다.
-    private func handleReceivedValue(_ data: Data?) {
+    private func handleReceivedValue(_ data: Data?, characteristic: CBCharacteristic) {
         guard let data else {
             notifyStatus("BLE 메시지 수신 데이터가 비어 있습니다.")
             return
         }
 
         guard let text = String(data: data, encoding: .utf8) else {
+            print("📥 [LissenceBLE] notify raw characteristic=\(characteristic.uuid.uuidString) bytes=\(data as NSData)")
             notifyStatus("BLE 메시지 UTF-8 해석 실패")
             return
         }
 
+        print("📥 [LissenceBLE] notify raw characteristic=\(characteristic.uuid.uuidString) text=\(text)")
         handleClockPongIfNeeded(text)
         notifyReceivedMessage(text)
     }
@@ -399,6 +553,19 @@ final class LissenceBLEManager: NSObject {
         }
 
         return .withResponse
+    }
+
+    private func propertiesText(for characteristic: CBCharacteristic) -> String {
+        var names: [String] = []
+        let properties = characteristic.properties
+
+        if properties.contains(.read) { names.append("read") }
+        if properties.contains(.write) { names.append("write") }
+        if properties.contains(.writeWithoutResponse) { names.append("writeWithoutResponse") }
+        if properties.contains(.notify) { names.append("notify") }
+        if properties.contains(.indicate) { names.append("indicate") }
+
+        return names.isEmpty ? "[]" : "[\(names.joined(separator: ","))]"
     }
 
     // MARK: - 상태 업데이트
@@ -514,8 +681,11 @@ extension LissenceBLEManager: CBCentralManagerDelegate {
     /// Peripheral 연결 해제를 화면 상태로 전달합니다. 자동 재스캔을 트리거합니다.
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         messageCharacteristic = nil
+        notifyCharacteristic = nil
         connectedPeripheral = nil
         clockOffsetSeconds = nil
+        lastClockPingAt = nil
+        lastClockPingSentMillis = nil
         notifyConnection(false)
 
         if let error {
@@ -556,12 +726,13 @@ extension LissenceBLEManager: CBPeripheralDelegate {
             return
         }
 
-        guard let characteristic = service.characteristics?.first(where: { $0.uuid == LissenceBLEConstants.characteristicUUID }) else {
+        guard let characteristics = service.characteristics,
+              !characteristics.isEmpty else {
             notifyStatus("대상 BLE Characteristic을 찾지 못했습니다.")
             return
         }
 
-        configureMessageCharacteristic(characteristic, peripheral: peripheral)
+        configureMessageCharacteristics(characteristics, peripheral: peripheral)
     }
 
     /// notify 또는 read로 갱신된 characteristic 값을 처리합니다.
@@ -571,7 +742,23 @@ extension LissenceBLEManager: CBPeripheralDelegate {
             return
         }
 
-        handleReceivedValue(characteristic.value)
+        handleReceivedValue(characteristic.value, characteristic: characteristic)
+    }
+
+    /// notify 구독 활성화 결과를 로깅합니다.
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        if let error {
+            print(
+                "⚠️ [LissenceBLE] notify state failed characteristic="
+                + "\(characteristic.uuid.uuidString) error=\(error.localizedDescription)"
+            )
+            return
+        }
+
+        print(
+            "📡 [LissenceBLE] notify state characteristic="
+            + "\(characteristic.uuid.uuidString) isNotifying=\(characteristic.isNotifying)"
+        )
     }
 
     /// 응답이 필요한 write 결과를 처리합니다.
