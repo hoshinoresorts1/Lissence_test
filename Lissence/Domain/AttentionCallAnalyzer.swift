@@ -25,12 +25,15 @@ struct AttentionCallAnalysis {
 final class AttentionCallAnalyzer {
     private let candidateKeywords = ["저기요", "안녕하세요"]
     private let emergencyKeywords = ["조심", "위험", "비켜요", "차", "뒤에", "피해요", "멈춰요", "조심하세요"]
-    private let repeatWindowSeconds: TimeInterval = 2.0
+    private let repeatWindowSeconds: TimeInterval = 5.0
     private let candidateContextSeconds: TimeInterval = 3.0
+    private let partialOverlapDedupeWindowSeconds: TimeInterval = 1.0
 
     private var candidateTimestamps: [Date] = []
     private var lastCandidateOccurrenceCount = 0
     private var lastCandidateDetectedAt: Date?
+    private var lastCountedCandidateAt: Date?
+    private var lastCountedCandidateSegment = ""
 
     /// 누적 transcript를 분석해 호출어 알림 단계를 반환합니다.
     func analyze(transcript: String, now: Date = Date()) -> AttentionCallAnalysis {
@@ -48,7 +51,8 @@ final class AttentionCallAnalyzer {
         treatsTranscriptAsNewSegment: Bool
     ) -> AttentionCallAnalysis {
         let trimmedTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        let candidateOccurrenceCount = countOccurrences(in: trimmedTranscript, keywords: candidateKeywords)
+        let normalizedTranscript = normalizeForCandidateMatching(trimmedTranscript)
+        let candidateOccurrenceCount = countOccurrences(in: normalizedTranscript, keywords: candidateKeywords)
         let newCandidateCount: Int
 
         if treatsTranscriptAsNewSegment {
@@ -66,15 +70,20 @@ final class AttentionCallAnalyzer {
         }
 
         if newCandidateCount > 0 {
-            candidateTimestamps.append(contentsOf: Array(repeating: now, count: newCandidateCount))
             lastCandidateDetectedAt = now
+            countCandidateIfNeeded(
+                count: newCandidateCount,
+                normalizedSegment: normalizedTranscript,
+                now: now
+            )
         }
 
-        candidateTimestamps.removeAll { now.timeIntervalSince($0) > candidateContextSeconds }
+        candidateTimestamps.removeAll { now.timeIntervalSince($0) > repeatWindowSeconds }
 
         let hasCurrentCandidate = candidateOccurrenceCount > 0
         let hasRecentCandidate = lastCandidateDetectedAt.map { now.timeIntervalSince($0) <= candidateContextSeconds } ?? false
         let repeatCount = candidateTimestamps.filter { now.timeIntervalSince($0) <= repeatWindowSeconds }.count
+        debugRepeatWindow(repeatCount: repeatCount)
         let hasCandidateContext = hasCurrentCandidate || hasRecentCandidate
         let emergencyDetected = hasCandidateContext && emergencyKeywords.contains { trimmedTranscript.contains($0) }
 
@@ -122,6 +131,12 @@ final class AttentionCallAnalyzer {
         candidateTimestamps.removeAll()
         lastCandidateOccurrenceCount = 0
         lastCandidateDetectedAt = nil
+        lastCountedCandidateAt = nil
+        lastCountedCandidateSegment = ""
+    }
+
+    private func normalizeForCandidateMatching(_ text: String) -> String {
+        text.filter { !$0.isWhitespace && !$0.isNewline }
     }
 
     private func countOccurrences(in text: String, keywords: [String]) -> Int {
@@ -130,10 +145,86 @@ final class AttentionCallAnalyzer {
         }
     }
 
+    private func countCandidateIfNeeded(count: Int, normalizedSegment: String, now: Date) {
+        guard count > 0 else {
+            return
+        }
+
+        if count >= 2 {
+            appendCountedCandidates(count: count, normalizedSegment: normalizedSegment, now: now)
+            debugCandidateCounted(reason: "direct repeated phrase", count: count)
+            return
+        }
+
+        if shouldDedupAsOverlapPartial(normalizedSegment: normalizedSegment, now: now) {
+            debugCandidateDedupe(reason: "deduped overlap partial")
+            return
+        }
+
+        appendCountedCandidates(count: count, normalizedSegment: normalizedSegment, now: now)
+        debugCandidateCounted(reason: "new utterance", count: count)
+    }
+
+    private func appendCountedCandidates(count: Int, normalizedSegment: String, now: Date) {
+        candidateTimestamps.append(contentsOf: Array(repeating: now, count: count))
+        lastCountedCandidateAt = now
+        lastCountedCandidateSegment = normalizedSegment
+    }
+
+    private func shouldDedupAsOverlapPartial(normalizedSegment: String, now: Date) -> Bool {
+        guard let lastCountedCandidateAt,
+              now.timeIntervalSince(lastCountedCandidateAt) <= partialOverlapDedupeWindowSeconds,
+              !lastCountedCandidateSegment.isEmpty,
+              normalizedSegment != lastCountedCandidateSegment else {
+            return false
+        }
+
+        if normalizedSegment.hasPrefix(lastCountedCandidateSegment) ||
+            lastCountedCandidateSegment.hasPrefix(normalizedSegment) {
+            return true
+        }
+
+        return maxSuffixPrefixOverlapLength(lastCountedCandidateSegment, normalizedSegment) >= 2 ||
+            maxSuffixPrefixOverlapLength(normalizedSegment, lastCountedCandidateSegment) >= 2
+    }
+
+    private func maxSuffixPrefixOverlapLength(_ left: String, _ right: String) -> Int {
+        let maxLength = min(left.count, right.count)
+        guard maxLength > 0 else {
+            return 0
+        }
+
+        for length in stride(from: maxLength, through: 1, by: -1) {
+            if left.suffix(length) == right.prefix(length) {
+                return length
+            }
+        }
+
+        return 0
+    }
+
+    private func debugCandidateCounted(reason: String, count: Int) {
+        #if DEBUG
+        print("[AttentionCall] candidate counted reason=\(reason), occurrenceCount=\(count)")
+        #endif
+    }
+
+    private func debugCandidateDedupe(reason: String) {
+        #if DEBUG
+        print("[AttentionCall] candidate \(reason)")
+        #endif
+    }
+
+    private func debugRepeatWindow(repeatCount: Int) {
+        #if DEBUG
+        print("[AttentionCall] repeatWindow=\(String(format: "%.1f", repeatWindowSeconds))s, countedCandidates=\(repeatCount)")
+        #endif
+    }
+
     private func debugLog(_ analysis: AttentionCallAnalysis) {
         #if DEBUG
         print(
-            "[AttentionCall] transcript=\(analysis.transcript), candidate=\(analysis.candidateDetected), recentCandidate=\(analysis.recentCandidateDetected), repeatCount=\(analysis.repeatCount), emergency=\(analysis.emergencyKeywordDetected), score=\(analysis.score), alertLevel=\(analysis.alertLevel.rawValue)"
+            "[AttentionCall] transcript=\(analysis.transcript), candidate=\(analysis.candidateDetected), recentCandidate=\(analysis.recentCandidateDetected), occurrenceCount=\(countOccurrences(in: normalizeForCandidateMatching(analysis.transcript), keywords: candidateKeywords)), repeatCount=\(analysis.repeatCount), emergency=\(analysis.emergencyKeywordDetected), score=\(analysis.score), alertLevel=\(analysis.alertLevel.rawValue)"
         )
         #endif
     }

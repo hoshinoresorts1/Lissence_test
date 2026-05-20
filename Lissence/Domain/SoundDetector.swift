@@ -1,6 +1,7 @@
 /// 아이폰용 소리 분석 엔진
 /// 감지 모드에서 위험 소리 분류를 수행하는 로직의 코드입니다.
 /// - 애플의 SoundAnalysis를 사용하여 감지모드에서 소리의 종류를 인식합니다.
+/// - SoundAnalysis window 시작 시각을 실제 마이크 도달 시각으로 환산해 ESP32에 전달합니다.
 
 import Foundation
 import SoundAnalysis
@@ -12,7 +13,9 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private var analyzer: SNAudioStreamAnalyzer?
     private let analysisQueue = DispatchQueue(label: "com.Lissence.AnalysisQueue")
     private var isStartingDetection = false
+    /// 첫 오디오 버퍼의 sampleTime 기준점입니다.
     private var firstSampleTime: AVAudioFramePosition?
+    /// 첫 오디오 버퍼가 들어온 실제 시각(Unix epoch ms)입니다.
     private var firstSampleTimestampMs: Double = 0
     
     // UI에서 현재 어떤 소리가 들리는지 보여줄 변수
@@ -86,6 +89,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                 if self.firstSampleTime == nil {
                     self.firstSampleTime = time.sampleTime
                     self.firstSampleTimestampMs = Date().timeIntervalSince1970 * 1000
+                    print("🎯 [SoundDetector] timeline anchor set: sampleTime=\(time.sampleTime), epochMs=\(self.firstSampleTimestampMs)")
                 }
 
                 self.analysisQueue.async {
@@ -121,6 +125,8 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         analyzer = nil
         isStartingDetection = false
         isDetecting = false
+        firstSampleTime = nil
+        firstSampleTimestampMs = 0
     }
 
     /// 소리 분석 처리 함수
@@ -154,7 +160,10 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                     self.lastDetectedSound = sound.label
                     self.lastDetectedDangerSound = sound
                     self.lastDetectionConfidence = classification.confidence
-                    print("🚨 [SoundDetector] DANGER detected: \(sound.rawValue) (confidence=\(String(format: "%.3f", classification.confidence)))")
+                    let latencyMs = Date().timeIntervalSince(classifiedAt) * 1000
+                    print("🚨 [SoundDetector] DANGER detected: \(sound.label) "
+                        + "(conf=\(String(format: "%.3f", classification.confidence)), "
+                        + "classifier_latency=\(String(format: "%.0f", latencyMs))ms)")
                     print("🎯 [SoundDetector] precise timestamp ms=\(Int64(classifiedAt.timeIntervalSince1970 * 1000))")
                     self.sendDangerAlert(sound: sound, classifiedAt: classifiedAt)
                 }
@@ -176,6 +185,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     /// SoundAnalysis 결과가 가리키는 실제 분석 window 시작 시각을 Date 기준으로 역산합니다.
     private func preciseClassificationDate(for result: SNClassificationResult) -> Date {
         guard let firstSampleTime,
+              firstSampleTimestampMs > 0,
               result.timeRange.start.timescale > 0 else {
             return Date()
         }
@@ -190,7 +200,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     /// 위험 소리 분류 결과를 Apple Watch와 ESP32 양쪽으로 전달합니다.
     /// - Parameters:
     ///   - sound: 분류된 위험 소리 유형.
-    ///   - classifiedAt: 분류 시각. ESP32 방향 윈도 매칭에 사용됩니다.
+    ///   - classifiedAt: 실제 마이크에 소리가 도달한 시각. ESP32 ring buffer 매칭에 사용됩니다.
     private func sendDangerAlert(sound: DangerSound, classifiedAt: Date) {
         // 1) Apple Watch 알림 (선택 기능 — Watch 미사용 환경이라면 이 두 줄을 주석 처리)
         let message = MessageData(

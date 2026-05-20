@@ -24,6 +24,14 @@ class SoundClassifier: NSObject, ObservableObject {
 
     @Published var isRunning = false
     @Published var detectedSound: DangerSound = .unknown
+
+    /// 가장 최근에 분류된 위험 소리가 실제 마이크에 도달한 시각입니다.
+    @Published var detectedAt: Date?
+
+    /// 첫 오디오 버퍼의 sampleTime 기준점입니다.
+    private var firstSampleTime: AVAudioFramePosition?
+    /// 첫 오디오 버퍼가 들어온 실제 시각(Unix epoch ms)입니다.
+    private var firstSampleTimestampMs: Double = 0
     
     // [솔루션 C 관련 설정값]
     private var isLowPowerMode: Bool {
@@ -86,6 +94,8 @@ class SoundClassifier: NSObject, ObservableObject {
     let inputNode = audioEngine.inputNode
     let recordingFormat = inputNode.outputFormat(forBus: 0)
     analyzer = SNAudioStreamAnalyzer(format: recordingFormat)
+    firstSampleTime = nil
+    firstSampleTimestampMs = 0
 
     do {
         let request = try SNClassifySoundRequest(classifierIdentifier: .version1)
@@ -93,6 +103,11 @@ class SoundClassifier: NSObject, ObservableObject {
             
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, time in
                 guard let self = self else { return }
+
+                if self.firstSampleTime == nil {
+                    self.firstSampleTime = time.sampleTime
+                    self.firstSampleTimestampMs = Date().timeIntervalSince1970 * 1000
+                }
                 
                 // 1. [솔루션 A] 데시벨 계산
                 guard let channelData = buffer.floatChannelData?[0] else { return }
@@ -145,7 +160,10 @@ class SoundClassifier: NSObject, ObservableObject {
         DispatchQueue.main.async {
             self.isRunning = false
             self.detectedSound = .unknown
+            self.detectedAt = nil
         }
+        firstSampleTime = nil
+        firstSampleTimestampMs = 0
     }
 }
 
@@ -155,6 +173,19 @@ extension SoundClassifier: SNResultsObserving {
     /// 소리 분석 결과가 나올 때마다 호출되는 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
+
+        let sourceTimeRange = result.timeRange
+        let startSamplePosition = sourceTimeRange.start.value
+        let timescale = Double(sourceTimeRange.start.timescale)
+        var preciseTimestampMs = Date().timeIntervalSince1970 * 1000
+
+        if let firstSample = firstSampleTime,
+           firstSampleTimestampMs > 0,
+           timescale > 0 {
+            let sampleOffset = Double(startSamplePosition - firstSample)
+            let audioOffsetInMs = sampleOffset / timescale * 1000
+            preciseTimestampMs = firstSampleTimestampMs + audioOffsetInMs
+        }
         
         // 신뢰도 순으로 순회하며 앱에서 허용하는 위험 감지 항목을 채택합니다.
         let sorted = result.classifications.sorted { $0.confidence > $1.confidence }
@@ -163,8 +194,13 @@ extension SoundClassifier: SNResultsObserving {
             guard classification.confidence >= confidenceThreshold else { break }
 
             if let soundType = DangerSound.from(identifier: classification.identifier) {
+                let preciseDate = Date(timeIntervalSince1970: preciseTimestampMs / 1000)
                 // ViewModel이 보고 있는 변수 업데이트
-                DispatchQueue.main.async { self.detectedSound = soundType }
+                DispatchQueue.main.async {
+                    self.detectedAt = preciseDate
+                    self.detectedSound = soundType
+                    print("🎯 오차 없는 물리 타임스탬프 추출 성공 (ts): \(Int64(preciseTimestampMs))")
+                }
                 return
             }
         }

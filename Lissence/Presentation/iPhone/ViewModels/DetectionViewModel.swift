@@ -59,13 +59,13 @@ class DetectionViewModel: NSObject, ObservableObject {
     /// 반복 호출 softAlert에서 표시할 플로팅 팝업 문구입니다.
     @Published var attentionPromptMessage: String = "누군가가 부릅니다. 음성 인식 기능을 켤까요?"
 
-    /// 1회 호출(displayOnly)의 화면 표시 여부입니다. 위험음 감지와 BLE 하드웨어 알림에는 적용하지 않습니다.
+    /// 1회 호출(displayOnly)의 iPhone 햅틱 활성화 여부입니다. 화면 표시는 항상 유지합니다.
     @Published var isSingleCallAlertEnabled: Bool = true
 
-    /// 반복 호출(softAlert)의 화면/햅틱/팝업 활성화 여부입니다.
+    /// 반복 호출(softAlert)의 iPhone 햅틱 활성화 여부입니다. 화면과 팝업은 항상 유지합니다.
     @Published var isRepeatedCallAlertEnabled: Bool = true
 
-    /// 긴급 호출(strongAlert)의 iPhone 화면/햅틱 활성화 여부입니다. Watch 전송은 항상 유지합니다.
+    /// 긴급 호출(strongAlert)의 iPhone 햅틱 활성화 여부입니다. 화면과 Watch 전송은 항상 유지합니다.
     @Published var isEmergencyCallAlertEnabled: Bool = true
 
     let quickPhrases = QuickPhrase.defaults
@@ -84,6 +84,8 @@ class DetectionViewModel: NSObject, ObservableObject {
     private var isViewActive = false
     private var lastAttentionPromptTime: Date = .distantPast
     private let attentionPromptCooldown: TimeInterval = 6.0
+    private let softAttentionPromptDelay: TimeInterval = 0.4
+    private var pendingAttentionPromptWorkItem: DispatchWorkItem?
     private var lastAttentionAlertTime: Date = .distantPast
     private var lastAttentionAlertSignature = ""
     private let attentionAlertCooldown: TimeInterval = 1.5
@@ -193,22 +195,20 @@ class DetectionViewModel: NSObject, ObservableObject {
         case .none:
             break
         case .displayOnly:
-            if isSingleCallAlertEnabled {
-                showAttentionCall(title: "호출어 후보 감지", isDanger: false)
+            showAttentionCall(title: "호출어 후보 감지", isDanger: false)
+            if shouldEmitAttentionAlert(level: .displayOnly, analysis: analysis) {
+                playSingleCallHapticIfAllowed()
             }
         case .softAlert:
-            if isRepeatedCallAlertEnabled {
-                showAttentionCall(title: "호출 감지", isDanger: false)
-            }
+            showAttentionCall(title: "호출 감지", isDanger: false)
             if shouldEmitAttentionAlert(level: .softAlert, analysis: analysis) {
                 playRepeatedCallHapticIfAllowed()
-                presentRepeatedCallPromptIfAllowed()
+                scheduleSoftAttentionPromptIfAllowed()
             }
             // TODO: Watch softAlert 별도 햅틱은 MessageData alertLevel 확장 후 연결합니다.
         case .strongAlert:
-            if isEmergencyCallAlertEnabled {
-                showAttentionCall(title: "긴급 호출 감지!", isDanger: true)
-            }
+            cancelPendingSoftAttentionPrompt()
+            showAttentionCall(title: "긴급 호출 감지!", isDanger: true)
             if shouldEmitAttentionAlert(level: .strongAlert, analysis: analysis) {
                 playEmergencyCallHapticIfAllowed()
                 sendStrongAttentionAlertToWatch(transcript: analysis.transcript)
@@ -281,15 +281,29 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
     }
 
-    /// 반복 호출 단계에 맞는 iPhone 햅틱을 재생합니다.
+    /// 1회 호출 단계의 iPhone 약한 햅틱을 재생합니다.
+    private func playSingleCallHapticIfAllowed() {
+        guard isSingleCallAlertEnabled else {
+            print("📳 [AttentionHaptic] skipped level=displayOnly, enabled=false")
+            return
+        }
+
+        print("📳 [AttentionHaptic] requested level=displayOnly, resolved=softAlert, enabled=true")
+        playAttentionHaptic(level: .softAlert)
+    }
+
+    /// 반복 호출 단계의 iPhone 약한 햅틱을 2회 재생합니다.
     private func playRepeatedCallHapticIfAllowed() {
         guard isRepeatedCallAlertEnabled else {
             print("📳 [AttentionHaptic] skipped level=softAlert, enabled=false")
             return
         }
 
-        print("📳 [AttentionHaptic] requested level=softAlert, resolved=softAlert, enabled=true")
+        print("📳 [AttentionHaptic] requested level=softAlert, resolved=softAlert x2, enabled=true")
         playAttentionHaptic(level: .softAlert)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { [weak self] in
+            self?.playAttentionHaptic(level: .softAlert)
+        }
     }
 
     /// 긴급 호출 단계에 맞는 iPhone 햅틱을 재생합니다. Watch 전송 여부에는 영향을 주지 않습니다.
@@ -326,10 +340,12 @@ class DetectionViewModel: NSObject, ObservableObject {
     private func resetAttentionCallState(resetAlertCooldown: Bool = false) {
         lastAttentionTranscript = ""
         attentionCallAnalyzer.reset()
+        cancelPendingSoftAttentionPrompt()
 
         if resetAlertCooldown {
             lastAttentionAlertSignature = ""
             lastAttentionAlertTime = .distantPast
+            lastAttentionPromptTime = .distantPast
         }
     }
 
@@ -361,12 +377,14 @@ class DetectionViewModel: NSObject, ObservableObject {
 
     /// 반복 호출 팝업의 "네" 동작입니다. 기존 음성인식 버튼 ON과 동일하게 대화 UI를 엽니다.
     func acceptAttentionPrompt() {
+        cancelPendingSoftAttentionPrompt()
         showAttentionPrompt = false
         activateVoiceMode()
     }
 
     /// 반복 호출 팝업의 "아니오" 동작입니다. 백그라운드 STT는 계속 유지합니다.
     func dismissAttentionPrompt() {
+        cancelPendingSoftAttentionPrompt()
         showAttentionPrompt = false
     }
 
@@ -424,13 +442,8 @@ class DetectionViewModel: NSObject, ObservableObject {
         return ""
     }
 
-    /// 반복 호출 softAlert에서 음성인식 UI 진입 제안 팝업을 중복 없이 표시합니다.
-    private func presentRepeatedCallPromptIfAllowed() {
-        guard isRepeatedCallAlertEnabled else {
-            showAttentionPrompt = false
-            return
-        }
-
+    /// 반복 호출 softAlert에서 음성인식 UI 진입 제안 팝업을 지연 예약합니다.
+    private func scheduleSoftAttentionPromptIfAllowed() {
         guard !isVoiceOn, !showAttentionPrompt else {
             return
         }
@@ -440,8 +453,28 @@ class DetectionViewModel: NSObject, ObservableObject {
             return
         }
 
-        lastAttentionPromptTime = now
-        showAttentionPrompt = true
+        cancelPendingSoftAttentionPrompt()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+
+            guard !self.isVoiceOn, !self.showAttentionPrompt else {
+                return
+            }
+
+            self.lastAttentionPromptTime = Date()
+            self.showAttentionPrompt = true
+            self.pendingAttentionPromptWorkItem = nil
+        }
+
+        pendingAttentionPromptWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + softAttentionPromptDelay, execute: workItem)
+    }
+
+    /// strongAlert 또는 화면 종료/상태 초기화 시 예약된 softAlert 팝업만 취소합니다.
+    private func cancelPendingSoftAttentionPrompt() {
+        pendingAttentionPromptWorkItem?.cancel()
+        pendingAttentionPromptWorkItem = nil
     }
 
     /// 감지모드가 켜져 있는 동안 AttentionCallAnalyzer 분석용 백그라운드 STT를 유지합니다.
@@ -485,6 +518,7 @@ class DetectionViewModel: NSObject, ObservableObject {
         commitTimer?.invalidate()
         ttsWatchdog?.invalidate()
         ttsWatchdog = nil
+        cancelPendingSoftAttentionPrompt()
         showAttentionPrompt = false
     }
 

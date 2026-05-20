@@ -136,7 +136,7 @@ final class LissenceBLEManager: NSObject {
     /// ESP32로 지정된 햅틱 pattern 실행 command를 전송합니다.
     /// - Parameters:
     ///   - pattern: ESP32 펌웨어에서 매핑하는 햅틱 패턴 식별자(siren/fireAlarm/carHorn 등).
-    ///   - classifiedAt: iPhone에서 위험 소리가 분류된 시각. ESP32 방향 윈도 매칭에 사용됩니다.
+    ///   - classifiedAt: 위험 소리가 실제 마이크에 도달한 시각. ESP32 방향 윈도 매칭에 사용됩니다.
     /// - Returns: 실제로 write 요청을 보냈으면 true, 쿨다운/미연결로 건너뛰면 false.
     @discardableResult
     func writeHapticPattern(_ pattern: String, classifiedAt: Date = Date()) -> Bool {
@@ -165,7 +165,9 @@ final class LissenceBLEManager: NSObject {
                 return
             }
 
-            let ts = self.hapticTimestampMillis(for: classifiedAt)
+            // ESP32 ring buffer는 ESP32 millis() 좌표계의 timestamp를 기대합니다.
+            // clock_pong offset이 있으면 보정값을 쓰고, 없으면 BLE latency fallback을 적용합니다.
+            let ts = self.esp32TimestampMillis(for: classifiedAt)
             let win = Int(LissenceBLEConstants.analysisWindowSeconds * 1000)
             let payload = #"{"type":"haptic","pattern":"\#(pattern)","ts":\#(ts),"win":\#(win)}"#
 
@@ -261,16 +263,6 @@ final class LissenceBLEManager: NSObject {
         let offsetSeconds = (espTs - nowTs) / 1000
         clockOffsetSeconds = offsetSeconds
         print("⏰ [LissenceBLE] clock_pong: esp_ts=\(espTs), now=\(nowTs), offset=\(String(format: "%.3f", offsetSeconds))s")
-    }
-
-    /// ESP32가 clock_ping 이후 경과 시간축으로 haptic event를 매칭할 수 있도록 timestamp(ms)를 계산합니다.
-    private func hapticTimestampMillis(for date: Date) -> Int64 {
-        if let lastClockPingAt {
-            let elapsedMs = date.timeIntervalSince(lastClockPingAt) * 1000
-            return Int64(elapsedMs)
-        }
-
-        return esp32TimestampMillis(for: date)
     }
 
     /// iPhone Date를 ESP32 윈도 매칭용 timestamp(ms) 로 변환합니다. clockOffset이 있으면 적용합니다.

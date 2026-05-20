@@ -149,9 +149,15 @@ extension DetectionDetailView {
                 .labelsHidden()
                 .toggleStyle(.switch)
                 .tint(tint)
+
+            Text(isOn.wrappedValue ? "진동 켜짐" : "화면만")
+                .font(.caption2.weight(.medium))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 58)
+        .frame(height: 74)
         .padding(.horizontal, 6)
         .background(tint.opacity(isOn.wrappedValue ? 0.10 : 0.06))
         .overlay(
