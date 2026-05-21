@@ -17,6 +17,10 @@ class SpeechManager: NSObject, ObservableObject {
     private let audioEngine = AVAudioEngine() // 마이크 입력용 엔진
     private var isStartingRecognition = false
     private var readyLogAfterStart: String?
+    private var currentStartReason = "unspecified"
+    private var currentStartRequestedAt: Date?
+    private var currentAudioEngineStartedAt: Date?
+    private var hasLoggedFirstPartialForCurrentSession = false
 
     // MARK: - Published Properties
 
@@ -41,14 +45,21 @@ class SpeechManager: NSObject, ObservableObject {
 
     /// Speech 권한과 마이크 권한을 확인한 뒤 음성 인식을 시작합니다.
     func startRecording(reason: String = "unspecified", readyLogAfterStart: String? = nil) {
+        let requestedAt = Date()
         print("[SpeechManager] startRecording requested reason=\(reason)")
+        print("[STT] startRecording called reason=\(reason) timestamp=\(String(format: "%.3f", requestedAt.timeIntervalSince1970))")
 
         guard !isStartingRecognition, !isRecording, !audioEngine.isRunning, recognitionTask == nil else {
             print("[SpeechManager] startRecording skipped reason=already-running-or-starting")
+            print("[STT] startRecording skipped reason=already-running-or-starting requestedReason=\(reason)")
             return
         }
 
         self.readyLogAfterStart = readyLogAfterStart
+        currentStartReason = reason
+        currentStartRequestedAt = requestedAt
+        currentAudioEngineStartedAt = nil
+        hasLoggedFirstPartialForCurrentSession = false
         isStartingRecognition = true
 
         requestSpeechAuthorization { [weak self] speechGranted in
@@ -105,6 +116,9 @@ class SpeechManager: NSObject, ObservableObject {
         isStartingRecognition = false
         isRecording = false
         readyLogAfterStart = nil
+        currentStartRequestedAt = nil
+        currentAudioEngineStartedAt = nil
+        hasLoggedFirstPartialForCurrentSession = false
     }
 
     // MARK: - 권한 처리
@@ -173,9 +187,21 @@ class SpeechManager: NSObject, ObservableObject {
             guard let self else { return }
 
             if let result = result {
+                let recognizedText = result.bestTranscription.formattedString
+                if !self.hasLoggedFirstPartialForCurrentSession,
+                   !recognizedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    self.hasLoggedFirstPartialForCurrentSession = true
+                    let receivedAt = Date()
+                    let startDeltaMs = self.currentAudioEngineStartedAt
+                        .map { receivedAt.timeIntervalSince($0) * 1000 } ?? -1
+                    print(
+                        "[STT] first partial received timestamp=\(String(format: "%.3f", receivedAt.timeIntervalSince1970)) reason=\(self.currentStartReason) deltaFromAudioStartMs=\(String(format: "%.0f", startDeltaMs)) text=\(recognizedText)"
+                    )
+                }
+
                 // 실시간으로 변환된 텍스트를 transcript에 저장
                 DispatchQueue.main.async {
-                    self.transcript = result.bestTranscription.formattedString
+                    self.transcript = recognizedText
                 }
             }
 
@@ -203,9 +229,15 @@ class SpeechManager: NSObject, ObservableObject {
         audioEngine.prepare()
         do {
             try audioEngine.start()
+            let startedAt = Date()
             isStartingRecognition = false
             isRecording = true
             print("[SpeechManager] audio engine started")
+            currentAudioEngineStartedAt = startedAt
+            let requestedDeltaMs = currentStartRequestedAt.map { startedAt.timeIntervalSince($0) * 1000 } ?? -1
+            print(
+                "[STT] audio engine actually started timestamp=\(String(format: "%.3f", startedAt.timeIntervalSince1970)) reason=\(currentStartReason) deltaFromRequestMs=\(String(format: "%.0f", requestedDeltaMs))"
+            )
             if let readyLogAfterStart {
                 print(readyLogAfterStart)
                 self.readyLogAfterStart = nil

@@ -101,6 +101,7 @@ class DetectionViewModel: NSObject, ObservableObject {
     private let ttsSpeechRestartDelay: TimeInterval = 0.1
     private let postTTSAutomaticSpeakBlock: TimeInterval = 2.0
     private var isAwaitingFirstTranscriptAfterTTS = false
+    private var hasLoggedFirstDisplayDecisionAfterTTS = true
     private var isReceivingPartnerSpeech = false
     private var isSpeechGateSTTActive = false
     private var lastTTSFinishedAt: Date = .distantPast
@@ -460,6 +461,21 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
 
         let visibleText = visibleSpeechText(from: rawTranscript)
+        let mode = conversationMode.rawValue
+        print(
+            "[STT] transcript route mode=\(mode) raw=\(logSnippet(rawTranscript)) baseline=\(logSnippet(visibleTranscriptBaseline)) visible=\(logSnippet(visibleText)) displayed=\(!visibleText.isEmpty)"
+        )
+
+        if !hasLoggedFirstDisplayDecisionAfterTTS {
+            let trimmedRaw = rawTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedRaw.isEmpty {
+                hasLoggedFirstDisplayDecisionAfterTTS = true
+                print(
+                    "[STT] first partial displayed/ignored mode=\(mode) displayed=\(!visibleText.isEmpty) raw=\(logSnippet(rawTranscript)) baseline=\(logSnippet(visibleTranscriptBaseline)) visible=\(logSnippet(visibleText))"
+                )
+            }
+        }
+
         transcript = visibleText
         schedulePartnerCommit(for: visibleText)
     }
@@ -470,22 +486,36 @@ class DetectionViewModel: NSObject, ObservableObject {
             return ""
         }
 
+        let trimmedRawTranscript = rawTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if visibleTranscriptBaseline.isEmpty {
+            print("[STT] baseline empty -> display raw=\(logSnippet(trimmedRawTranscript))")
+            return trimmedRawTranscript
+        }
+
         if !visibleTranscriptBaseline.isEmpty, rawTranscript.hasPrefix(visibleTranscriptBaseline) {
-            return String(rawTranscript.dropFirst(visibleTranscriptBaseline.count))
+            let delta = String(rawTranscript.dropFirst(visibleTranscriptBaseline.count))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
+            print("[STT] baseline delta accepted delta=\(logSnippet(delta))")
+            return delta
         }
 
         if rawTranscript == visibleTranscriptBaseline {
+            print("[STT] transcript ignored reason=equalsBaseline baseline=\(logSnippet(visibleTranscriptBaseline))")
             return ""
         }
 
         // Speech가 재시작되어 transcript가 짧아진 경우에는 새 세션 문장으로 간주합니다.
         if rawTranscript.count < visibleTranscriptBaseline.count {
             visibleTranscriptBaseline = ""
-            return rawTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+            print("[STT] baseline reset reason=rawShorterThanBaseline raw=\(logSnippet(rawTranscript))")
+            return trimmedRawTranscript
         }
 
         // baseline과 prefix가 맞지 않는 긴 누적문은 UI에 노출하지 않고 새 baseline으로만 삼습니다.
+        print(
+            "[STT] transcript ignored reason=baselinePrefixMismatch oldBaseline=\(logSnippet(visibleTranscriptBaseline)) newBaseline=\(logSnippet(rawTranscript))"
+        )
         visibleTranscriptBaseline = rawTranscript
         return ""
     }
@@ -501,7 +531,19 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
 
         print("[SpeechManager] first transcript after TTS = \(trimmedTranscript)")
+        print("[STT] first transcript after TTS timestamp=\(String(format: "%.3f", Date().timeIntervalSince1970)) text=\(trimmedTranscript)")
         isAwaitingFirstTranscriptAfterTTS = false
+    }
+
+    private func logSnippet(_ text: String) -> String {
+        let trimmed = text
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count > 40 else {
+            return trimmed.isEmpty ? "<empty>" : trimmed
+        }
+
+        return "\(trimmed.prefix(40))..."
     }
 
     /// 반복 호출 softAlert에서 음성인식 UI 진입 제안 팝업을 지연 예약합니다.
@@ -860,9 +902,11 @@ extension DetectionViewModel: TTSManagerDelegate {
         visibleTranscriptBaseline = ""
         speechManager.resetTranscript()
         isAwaitingFirstTranscriptAfterTTS = true
+        hasLoggedFirstDisplayDecisionAfterTTS = false
         commitTimer?.invalidate()
 
         print("[TTS] didFinish -> schedule STT restart after \(ttsSpeechRestartDelay)s")
+        print("[STT] restart scheduled delay=\(ttsSpeechRestartDelay) timestamp=\(String(format: "%.3f", Date().timeIntervalSince1970)) mode=\(conversationMode.rawValue)")
         DispatchQueue.main.asyncAfter(deadline: .now() + ttsSpeechRestartDelay) { [weak self] in
             guard let self, self.isViewActive, !self.isMicSuspendedForTTS else {
                 return

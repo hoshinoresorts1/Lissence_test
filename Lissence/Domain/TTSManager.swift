@@ -91,7 +91,9 @@ final class TTSManager: NSObject {
 
     private func finishCurrentSpeech(reason: String) {
         let idText = currentUtteranceID?.uuidString ?? "-"
+        let finishedAt = Date().timeIntervalSince1970
         print("[TTS] didFinish id=\(idText) source=\(currentSource) reason=\(reason) text=\(currentTextPrefix)")
+        print("[TTS] didFinish timestamp=\(String(format: "%.3f", finishedAt))")
 
         isPreparingSpeech = false
         currentUtteranceID = nil
