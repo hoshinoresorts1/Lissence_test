@@ -290,6 +290,7 @@ class DetectionViewModel: NSObject, ObservableObject {
 
         print("📳 [AttentionHaptic] requested level=displayOnly, resolved=softAlert, enabled=true")
         playAttentionHaptic(level: .softAlert)
+        LissenceBLEManager.shared.writeAttentionHaptic(pattern: "single")
     }
 
     /// 반복 호출 단계의 iPhone 약한 햅틱을 2회 재생합니다.
@@ -301,6 +302,7 @@ class DetectionViewModel: NSObject, ObservableObject {
 
         print("📳 [AttentionHaptic] requested level=softAlert, resolved=softAlert x2, enabled=true")
         playAttentionHaptic(level: .softAlert)
+        LissenceBLEManager.shared.writeAttentionHaptic(pattern: "repeat")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { [weak self] in
             self?.playAttentionHaptic(level: .softAlert)
         }
@@ -315,6 +317,7 @@ class DetectionViewModel: NSObject, ObservableObject {
 
         print("📳 [AttentionHaptic] requested level=strongAlert, resolved=strongAlert, enabled=true")
         playAttentionHaptic(level: .strongAlert)
+        LissenceBLEManager.shared.writeAttentionHaptic(pattern: "emergency")
     }
 
     private func playAttentionHaptic(level: AttentionAlertLevel) {

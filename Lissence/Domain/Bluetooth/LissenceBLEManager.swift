@@ -187,6 +187,37 @@ final class LissenceBLEManager: NSObject {
         return true
     }
 
+    /// 호출어 감지 단계에 맞는 ESP32 햅틱 command를 전송합니다.
+    /// 위험음 정밀 timestamp/방향 매칭 프로토콜(type=haptic)과 분리된 즉시 실행 경로입니다.
+    @discardableResult
+    func writeAttentionHaptic(pattern: String) -> Bool {
+        bluetoothQueue.async { [weak self] in
+            guard let self else { return }
+
+            guard self.centralManager.state == .poweredOn else {
+                print("📡 [BLEAttention] skip: Bluetooth not powered on")
+                return
+            }
+
+            guard let connectedPeripheral = self.connectedPeripheral,
+                  connectedPeripheral.state == .connected else {
+                print("📡 [BLEAttention] skip: peripheral not connected")
+                return
+            }
+
+            guard let messageCharacteristic = self.messageCharacteristic else {
+                print("📡 [BLEAttention] skip: characteristic unavailable")
+                return
+            }
+
+            let payload = #"{"type":"attention_haptic","pattern":"\#(pattern)"}"#
+            self.write(payload, peripheral: connectedPeripheral, characteristic: messageCharacteristic)
+            print("📡 [BLEAttention] write pattern=\(pattern)")
+        }
+
+        return true
+    }
+
     /// ESP32로 UTF-8 문자열을 전송합니다.
     func write(_ text: String) {
         bluetoothQueue.async { [weak self] in
