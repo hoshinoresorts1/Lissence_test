@@ -16,6 +16,7 @@ class SpeechManager: NSObject, ObservableObject {
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine() // 마이크 입력용 엔진
     private var isStartingRecognition = false
+    private var readyLogAfterStart: String?
 
     // MARK: - Published Properties
 
@@ -26,12 +27,28 @@ class SpeechManager: NSObject, ObservableObject {
 
     // MARK: - 공개 메서드
 
-    /// Speech 권한과 마이크 권한을 확인한 뒤 음성 인식을 시작합니다.
-    func startRecording() {
-        guard !isStartingRecognition, !isRecording, !audioEngine.isRunning, recognitionTask == nil else {
+    /// 다음 인식 세션을 새 문장으로 시작하기 위해 누적 transcript를 비웁니다.
+    func resetTranscript() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.resetTranscript()
+            }
             return
         }
 
+        transcript = ""
+    }
+
+    /// Speech 권한과 마이크 권한을 확인한 뒤 음성 인식을 시작합니다.
+    func startRecording(reason: String = "unspecified", readyLogAfterStart: String? = nil) {
+        print("[SpeechManager] startRecording requested reason=\(reason)")
+
+        guard !isStartingRecognition, !isRecording, !audioEngine.isRunning, recognitionTask == nil else {
+            print("[SpeechManager] startRecording skipped reason=already-running-or-starting")
+            return
+        }
+
+        self.readyLogAfterStart = readyLogAfterStart
         isStartingRecognition = true
 
         requestSpeechAuthorization { [weak self] speechGranted in
@@ -41,6 +58,7 @@ class SpeechManager: NSObject, ObservableObject {
                 DispatchQueue.main.async {
                     print("[SpeechManager] speech authorization denied or restricted")
                     self.transcript = "음성 인식 권한이 필요합니다."
+                    self.readyLogAfterStart = nil
                     self.isStartingRecognition = false
                     self.isRecording = false
                 }
@@ -54,6 +72,7 @@ class SpeechManager: NSObject, ObservableObject {
                     DispatchQueue.main.async {
                         print("[SpeechManager] microphone permission denied")
                         self.transcript = "마이크 권한이 필요합니다."
+                        self.readyLogAfterStart = nil
                         self.isStartingRecognition = false
                         self.isRecording = false
                     }
@@ -85,6 +104,7 @@ class SpeechManager: NSObject, ObservableObject {
         recognitionRequest = nil
         isStartingRecognition = false
         isRecording = false
+        readyLogAfterStart = nil
     }
 
     // MARK: - 권한 처리
@@ -129,10 +149,12 @@ class SpeechManager: NSObject, ObservableObject {
         // 오디오 세션 설정 (말소리 듣기 모드)
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            print("[SpeechManager] configure audio session for recording")
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             transcript = "오디오 세션 설정에 실패했습니다."
+            readyLogAfterStart = nil
             isStartingRecognition = false
             print("[SpeechManager] audio session setup failed: \(error.localizedDescription)")
             return
@@ -183,8 +205,14 @@ class SpeechManager: NSObject, ObservableObject {
             try audioEngine.start()
             isStartingRecognition = false
             isRecording = true
+            print("[SpeechManager] audio engine started")
+            if let readyLogAfterStart {
+                print(readyLogAfterStart)
+                self.readyLogAfterStart = nil
+            }
         } catch {
             transcript = "오디오 엔진 시작에 실패했습니다."
+            readyLogAfterStart = nil
             isStartingRecognition = false
             print("[SpeechManager] audioEngine.start failed: \(error.localizedDescription)")
         }

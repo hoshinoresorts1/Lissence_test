@@ -7,6 +7,14 @@ import AVFoundation
 import UIKit
 
 class DetectionViewModel: NSObject, ObservableObject {
+    private enum TTSRequestSource: String {
+        case defaultGuide
+        case suggestion
+        case manualInput
+        case replay
+        case autoReply
+    }
+
     // MARK: - 의존성 주입 (Services)
     private let soundDetector = SoundDetector()
     private let speechManager = SpeechManager()
@@ -25,7 +33,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             if oldValue == true && isVoiceOn == false {
                 visibleTranscriptBaseline = latestRawSpeechTranscript
                 resetConversationState()
-                ensureSpeechRecognitionRunning()
+                speechManager.stopRecording()
                 if !soundDetector.isRunning {
                     soundDetector.startDetection()
                 }
@@ -76,6 +84,7 @@ class DetectionViewModel: NSObject, ObservableObject {
     private var resetTimer: Timer?
     private var commitTimer: Timer?
     private var ttsWatchdog: Timer?
+    private var speechGateTimer: Timer?
     private var lastCommittedTranscript = ""
     private var latestRawSpeechTranscript = ""
     private var visibleTranscriptBaseline = ""
@@ -89,6 +98,13 @@ class DetectionViewModel: NSObject, ObservableObject {
     private var lastAttentionAlertTime: Date = .distantPast
     private var lastAttentionAlertSignature = ""
     private let attentionAlertCooldown: TimeInterval = 1.5
+    private let ttsSpeechRestartDelay: TimeInterval = 0.1
+    private let postTTSAutomaticSpeakBlock: TimeInterval = 2.0
+    private var isAwaitingFirstTranscriptAfterTTS = false
+    private var isReceivingPartnerSpeech = false
+    private var isSpeechGateSTTActive = false
+    private var lastTTSFinishedAt: Date = .distantPast
+    private let speechGateHoldDuration: TimeInterval = 4.0
     private let maxAttentionSegmentLength = 30
     private var lastDangerHapticTime: Date = .distantPast
     private var lastDangerHapticSound: DangerSound = .unknown
@@ -111,6 +127,13 @@ class DetectionViewModel: NSObject, ObservableObject {
             }
             .store(in: &cancellables)
 
+        soundDetector.speechActivity
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] confidence in
+                self?.handleSpeechActivity(confidence: confidence)
+            }
+            .store(in: &cancellables)
+
         // SpeechManager에서 인식된 자막 업데이트
         speechManager.$transcript
             .receive(on: DispatchQueue.main)
@@ -118,6 +141,7 @@ class DetectionViewModel: NSObject, ObservableObject {
                 guard let self else { return }
 
                 self.latestRawSpeechTranscript = rawTranscript
+                self.logFirstTranscriptAfterTTSIfNeeded(rawTranscript)
                 self.handleAttentionCallTranscriptUpdate(rawTranscript)
                 self.updateVisibleTranscriptIfNeeded(rawTranscript)
             }
@@ -197,11 +221,13 @@ class DetectionViewModel: NSObject, ObservableObject {
         case .displayOnly:
             showAttentionCall(title: "호출어 후보 감지", isDanger: false)
             if shouldEmitAttentionAlert(level: .displayOnly, analysis: analysis) {
+                print("[AttentionControl] singleHapticEnabled=\(isSingleCallAlertEnabled)")
                 playSingleCallHapticIfAllowed()
             }
         case .softAlert:
             showAttentionCall(title: "호출 감지", isDanger: false)
             if shouldEmitAttentionAlert(level: .softAlert, analysis: analysis) {
+                print("[AttentionControl] repeatHapticEnabled=\(isRepeatedCallAlertEnabled)")
                 playRepeatedCallHapticIfAllowed()
                 scheduleSoftAttentionPromptIfAllowed()
             }
@@ -210,6 +236,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             cancelPendingSoftAttentionPrompt()
             showAttentionCall(title: "긴급 호출 감지!", isDanger: true)
             if shouldEmitAttentionAlert(level: .strongAlert, analysis: analysis) {
+                print("[AttentionControl] emergencyHapticEnabled=\(isEmergencyCallAlertEnabled)")
                 playEmergencyCallHapticIfAllowed()
                 sendStrongAttentionAlertToWatch(transcript: analysis.transcript)
                 attentionCallAnalyzer.reset()
@@ -283,8 +310,12 @@ class DetectionViewModel: NSObject, ObservableObject {
 
     /// 1회 호출 단계의 iPhone 약한 햅틱을 재생합니다.
     private func playSingleCallHapticIfAllowed() {
+        let enabledBySlider = isSingleCallAlertEnabled
+        print("[AttentionHaptic] requested=single, enabledBySlider=\(enabledBySlider), shouldSendBLE=\(enabledBySlider)")
+
         guard isSingleCallAlertEnabled else {
             print("📳 [AttentionHaptic] skipped level=displayOnly, enabled=false")
+            print("📡 [BLEAttention] skipped pattern=single reason=sliderOff")
             return
         }
 
@@ -295,8 +326,12 @@ class DetectionViewModel: NSObject, ObservableObject {
 
     /// 반복 호출 단계의 iPhone 약한 햅틱을 2회 재생합니다.
     private func playRepeatedCallHapticIfAllowed() {
+        let enabledBySlider = isRepeatedCallAlertEnabled
+        print("[AttentionHaptic] requested=repeat, enabledBySlider=\(enabledBySlider), shouldSendBLE=\(enabledBySlider)")
+
         guard isRepeatedCallAlertEnabled else {
             print("📳 [AttentionHaptic] skipped level=softAlert, enabled=false")
+            print("📡 [BLEAttention] skipped pattern=repeat reason=sliderOff")
             return
         }
 
@@ -310,8 +345,12 @@ class DetectionViewModel: NSObject, ObservableObject {
 
     /// 긴급 호출 단계에 맞는 iPhone 햅틱을 재생합니다. Watch 전송 여부에는 영향을 주지 않습니다.
     private func playEmergencyCallHapticIfAllowed() {
+        let enabledBySlider = isEmergencyCallAlertEnabled
+        print("[AttentionHaptic] requested=emergency, enabledBySlider=\(enabledBySlider), shouldSendBLE=\(enabledBySlider)")
+
         guard isEmergencyCallAlertEnabled else {
             print("📳 [AttentionHaptic] skipped level=strongAlert, enabled=false")
+            print("📡 [BLEAttention] skipped pattern=emergency reason=sliderOff")
             return
         }
 
@@ -393,9 +432,15 @@ class DetectionViewModel: NSObject, ObservableObject {
 
     /// 음성인식 UI를 열고, 이전 백그라운드 STT 누적분은 화면 표시 기준선으로만 저장합니다.
     private func activateVoiceMode() {
+        if isSpeechGateSTTActive {
+            isSpeechGateSTTActive = false
+            speechGateTimer?.invalidate()
+            speechGateTimer = nil
+        }
+
         prepareVisibleSpeechSession()
         isVoiceOn = true
-        ensureSpeechRecognitionRunning()
+        ensureSpeechRecognitionRunning(reason: "speech-ui-activated")
     }
 
     /// UI 표시용 STT 상태를 새 대화 시작 기준으로 초기화합니다.
@@ -445,6 +490,20 @@ class DetectionViewModel: NSObject, ObservableObject {
         return ""
     }
 
+    private func logFirstTranscriptAfterTTSIfNeeded(_ rawTranscript: String) {
+        guard isAwaitingFirstTranscriptAfterTTS else {
+            return
+        }
+
+        let trimmedTranscript = rawTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTranscript.isEmpty else {
+            return
+        }
+
+        print("[SpeechManager] first transcript after TTS = \(trimmedTranscript)")
+        isAwaitingFirstTranscriptAfterTTS = false
+    }
+
     /// 반복 호출 softAlert에서 음성인식 UI 진입 제안 팝업을 지연 예약합니다.
     private func scheduleSoftAttentionPromptIfAllowed() {
         guard !isVoiceOn, !showAttentionPrompt else {
@@ -480,18 +539,81 @@ class DetectionViewModel: NSObject, ObservableObject {
         pendingAttentionPromptWorkItem = nil
     }
 
-    /// 감지모드가 켜져 있는 동안 AttentionCallAnalyzer 분석용 백그라운드 STT를 유지합니다.
-    private func ensureSpeechRecognitionRunning() {
+    private func handleSpeechActivity(confidence: Double) {
+        print("[SpeechGate] speech detected confidence=\(String(format: "%.2f", confidence))")
+
+        guard isViewActive else {
+            return
+        }
+
+        guard !isMicSuspendedForTTS else {
+            print("[SpeechGate] skip STT because TTS is active")
+            return
+        }
+
+        guard !isVoiceOn else {
+            print("[SpeechGate] speech UI active, keep conversation STT")
+            return
+        }
+
+        if isSpeechGateSTTActive || speechManager.isRecording {
+            print("[SpeechGate] extend STT window")
+        } else {
+            print("[SpeechGate] start STT for attention call")
+            isSpeechGateSTTActive = true
+            latestRawSpeechTranscript = ""
+            speechManager.resetTranscript()
+            speechManager.startRecording(reason: "speechGate")
+        }
+
+        scheduleSpeechGateStop()
+    }
+
+    private func scheduleSpeechGateStop() {
+        speechGateTimer?.invalidate()
+        speechGateTimer = Timer.scheduledTimer(withTimeInterval: speechGateHoldDuration, repeats: false) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.stopSpeechGateSTTIfNeeded()
+            }
+        }
+    }
+
+    private func stopSpeechGateSTTIfNeeded() {
+        guard isSpeechGateSTTActive, !isVoiceOn else {
+            return
+        }
+
+        print("[SpeechGate] stop STT after timeout")
+        isSpeechGateSTTActive = false
+        speechGateTimer?.invalidate()
+        speechGateTimer = nil
+        speechManager.stopRecording()
+    }
+
+    /// 음성 UI가 켜져 있을 때만 대화용 STT를 유지합니다.
+    private func ensureSpeechRecognitionRunning(reason: String) {
+        print("[DetectionVM] speech UI active = \(isVoiceOn)")
+
+        guard isVoiceOn else {
+            print("[DetectionVM] skip SpeechManager restart because speech UI inactive")
+            return
+        }
+
         guard isViewActive, !isMicSuspendedForTTS, !speechManager.isRecording else {
             return
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            guard let self, self.isViewActive, !self.isMicSuspendedForTTS, !self.speechManager.isRecording else {
+            guard let self, self.isVoiceOn else {
+                print("[DetectionVM] skip SpeechManager restart because speech UI inactive")
                 return
             }
 
-            self.speechManager.startRecording()
+            guard self.isViewActive, !self.isMicSuspendedForTTS, !self.speechManager.isRecording else {
+                return
+            }
+
+            self.speechManager.startRecording(reason: reason)
         }
     }
 
@@ -504,7 +626,6 @@ class DetectionViewModel: NSObject, ObservableObject {
         TTSManager.shared.delegate = self
         resetAttentionCallState(resetAlertCooldown: true)
         soundDetector.startDetection()
-        ensureSpeechRecognitionRunning()
         bleManager.startScan()
     }
 
@@ -512,6 +633,9 @@ class DetectionViewModel: NSObject, ObservableObject {
         isViewActive = false
         soundDetector.stopDetection()
         speechManager.stopRecording()
+        speechGateTimer?.invalidate()
+        speechGateTimer = nil
+        isSpeechGateSTTActive = false
         resetAttentionCallState(resetAlertCooldown: true)
         TTSManager.shared.stop()
         // BLE 연결은 백그라운드 위험 감지에도 사용될 수 있으므로 유지합니다.
@@ -542,6 +666,7 @@ class DetectionViewModel: NSObject, ObservableObject {
             return
         }
 
+        isReceivingPartnerSpeech = true
         commitTimer?.invalidate()
         commitTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { [weak self] _ in
             DispatchQueue.main.async {
@@ -554,6 +679,7 @@ class DetectionViewModel: NSObject, ObservableObject {
     private func commitPartnerMessage() {
         let fullTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !fullTranscript.isEmpty else {
+            isReceivingPartnerSpeech = false
             return
         }
 
@@ -566,15 +692,17 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
 
         guard !newPart.isEmpty else {
+            isReceivingPartnerSpeech = false
             return
         }
 
         messages.append(ChatMessage(text: newPart, sender: .partner))
         lastCommittedTranscript = fullTranscript
+        isReceivingPartnerSpeech = false
     }
 
     func speakDefaultGuide() {
-        speakText(defaultTTSGuide, appendMessage: true)
+        speakText(defaultTTSGuide, appendMessage: true, source: .defaultGuide)
     }
 
     func sendMyMessage(speak: Bool = true) {
@@ -584,30 +712,66 @@ class DetectionViewModel: NSObject, ObservableObject {
         }
 
         inputText = ""
-        speakText(text, appendMessage: true, speak: speak)
+        speakText(text, appendMessage: true, speak: speak, source: .manualInput)
     }
 
     func sendQuickPhrase(_ phrase: QuickPhrase) {
-        speakText(phrase.text, appendMessage: true)
+        print("[ChatSuggestion] tapped text=\(phrase.text)")
+        speakText(phrase.text, appendMessage: true, source: .suggestion)
     }
 
     func replay(_ message: ChatMessage) {
-        TTSManager.shared.speak(message.text)
+        requestTTS(message.text, source: .replay)
     }
 
-    private func speakText(_ text: String, appendMessage: Bool, speak: Bool = true) {
+    private func speakText(
+        _ text: String,
+        appendMessage: Bool,
+        speak: Bool = true,
+        source: TTSRequestSource
+    ) {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else {
             return
         }
 
+        let wasAcceptedForSpeech = speak ? requestTTS(trimmedText, source: source) : false
+
         if appendMessage {
-            messages.append(ChatMessage(text: trimmedText, sender: .me, wasSpoken: speak))
+            guard !speak || wasAcceptedForSpeech else {
+                return
+            }
+            messages.append(ChatMessage(text: trimmedText, sender: .me, wasSpoken: wasAcceptedForSpeech))
+        }
+    }
+
+    @discardableResult
+    private func requestTTS(_ text: String, source: TTSRequestSource) -> Bool {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            return false
         }
 
-        if speak {
-            TTSManager.shared.speak(trimmedText)
+        if source == .autoReply {
+            print("[TTS] ignored source=\(source.rawValue) reason=auto-reply-disabled text=\(trimmedText.prefix(20))")
+            return false
         }
+
+        if isReceivingPartnerSpeech {
+            print("[TTS] ignored source=\(source.rawValue) reason=partner-speaking text=\(trimmedText.prefix(20))")
+            return false
+        }
+
+        if source == .suggestion {
+            let elapsedAfterFinish = Date().timeIntervalSince(lastTTSFinishedAt)
+            if elapsedAfterFinish < postTTSAutomaticSpeakBlock {
+                print("[TTS] ignored source=\(source.rawValue) reason=post-tts-block text=\(trimmedText.prefix(20))")
+                return false
+            }
+        }
+
+        print("[TTS] request source=\(source.rawValue) text=\(trimmedText.prefix(20))")
+        return TTSManager.shared.speak(trimmedText, source: source.rawValue)
     }
 
     private func resetConversationState() {
@@ -616,8 +780,12 @@ class DetectionViewModel: NSObject, ObservableObject {
         lastCommittedTranscript = ""
         commitTimer?.invalidate()
         ttsWatchdog?.invalidate()
+        speechGateTimer?.invalidate()
         ttsWatchdog = nil
+        speechGateTimer = nil
         isMicSuspendedForTTS = false
+        isReceivingPartnerSpeech = false
+        isSpeechGateSTTActive = false
         messages.removeAll()
         inputText = ""
         conversationMode = .subtitle
@@ -655,7 +823,10 @@ extension DetectionViewModel: TTSManagerDelegate {
             return
         }
 
+        print("[TTS] didStart -> stop STT")
         isMicSuspendedForTTS = true
+        isAwaitingFirstTranscriptAfterTTS = false
+        isReceivingPartnerSpeech = false
         speechManager.stopRecording()
         commitTimer?.invalidate()
 
@@ -676,23 +847,31 @@ extension DetectionViewModel: TTSManagerDelegate {
         }
 
         isMicSuspendedForTTS = false
+        lastTTSFinishedAt = Date()
 
         guard isVoiceOn else {
-            ensureSpeechRecognitionRunning()
+            print("[DetectionVM] skip SpeechManager restart because speech UI inactive")
             return
         }
 
         lastCommittedTranscript = ""
         transcript = ""
-        visibleTranscriptBaseline = latestRawSpeechTranscript
+        latestRawSpeechTranscript = ""
+        visibleTranscriptBaseline = ""
+        speechManager.resetTranscript()
+        isAwaitingFirstTranscriptAfterTTS = true
         commitTimer?.invalidate()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+        print("[TTS] didFinish -> schedule STT restart after \(ttsSpeechRestartDelay)s")
+        DispatchQueue.main.asyncAfter(deadline: .now() + ttsSpeechRestartDelay) { [weak self] in
             guard let self, self.isViewActive, !self.isMicSuspendedForTTS else {
                 return
             }
 
-            self.speechManager.startRecording()
+            self.speechManager.startRecording(
+                reason: "tts-finished",
+                readyLogAfterStart: "[SpeechManager] ready for user speech after TTS"
+            )
         }
     }
 }

@@ -17,6 +17,11 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private var firstSampleTime: AVAudioFramePosition?
     /// 첫 오디오 버퍼가 들어온 실제 시각(Unix epoch ms)입니다.
     private var firstSampleTimestampMs: Double = 0
+    private var audioBufferLogCount = 0
+    private let speechActivityConfidenceThreshold = 0.50
+
+    /// SoundAnalysis가 speech를 감지했을 때 호출어 STT 게이트를 열기 위한 이벤트입니다.
+    let speechActivity = PassthroughSubject<Double, Never>()
     
     // UI에서 현재 어떤 소리가 들리는지 보여줄 변수
     @Published var statusText: String = "주변 소리 분석 중..."
@@ -59,6 +64,7 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         lastAnalyzerClassificationConfidence = nil
         firstSampleTime = nil
         firstSampleTimestampMs = 0
+        audioBufferLogCount = 0
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -90,6 +96,11 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                     self.firstSampleTime = time.sampleTime
                     self.firstSampleTimestampMs = Date().timeIntervalSince1970 * 1000
                     print("🎯 [SoundDetector] timeline anchor set: sampleTime=\(time.sampleTime), epochMs=\(self.firstSampleTimestampMs)")
+                }
+
+                self.audioBufferLogCount += 1
+                if self.audioBufferLogCount == 1 || self.audioBufferLogCount % 100 == 0 {
+                    print("[SoundDetector] audio buffer received count=\(self.audioBufferLogCount)")
                 }
 
                 self.analysisQueue.async {
@@ -127,11 +138,13 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
         isDetecting = false
         firstSampleTime = nil
         firstSampleTimestampMs = 0
+        audioBufferLogCount = 0
     }
 
     /// 소리 분석 처리 함수
     func request(_ request: SNRequest, didProduce result: SNResult) {
         guard let result = result as? SNClassificationResult else { return }
+        print("[SoundDetector] analyzer callback alive")
         let classifiedAt = preciseClassificationDate(for: result)
 
         // 1. 신뢰도 순 정렬 및 임계값 체크
@@ -143,6 +156,15 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                 .map { "\($0.identifier)(\(Int($0.confidence * 100))%)" }
                 .joined(separator: ", ")
             print("🎧 [SoundDetector] top3: \(top3)")
+
+            if let speechClassification = sorted.prefix(3).first(where: { classification in
+                classification.identifier.lowercased().contains("speech") &&
+                    classification.confidence >= speechActivityConfidenceThreshold
+            }) {
+                DispatchQueue.main.async {
+                    self.speechActivity.send(speechClassification.confidence)
+                }
+            }
 
             DispatchQueue.main.async {
                 self.lastAnalyzerClassificationIdentifier = topClassification.identifier

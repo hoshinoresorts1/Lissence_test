@@ -151,13 +151,14 @@ final class AttentionCallAnalyzer {
         }
 
         if count >= 2 {
+            debugDirectRepeatedPhrase(count: count)
             appendCountedCandidates(count: count, normalizedSegment: normalizedSegment, now: now)
             debugCandidateCounted(reason: "direct repeated phrase", count: count)
             return
         }
 
         if shouldDedupAsOverlapPartial(normalizedSegment: normalizedSegment, now: now) {
-            debugCandidateDedupe(reason: "deduped overlap partial")
+            debugCandidateDedupe(reason: "deduped overlap partial only after direct phrase check")
             return
         }
 
@@ -206,6 +207,12 @@ final class AttentionCallAnalyzer {
     private func debugCandidateCounted(reason: String, count: Int) {
         #if DEBUG
         print("[AttentionCall] candidate counted reason=\(reason), occurrenceCount=\(count)")
+        #endif
+    }
+
+    private func debugDirectRepeatedPhrase(count: Int) {
+        #if DEBUG
+        print("[AttentionCall] direct repeated phrase occurrenceCount=\(count)")
         #endif
     }
 
