@@ -19,6 +19,13 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     private var firstSampleTimestampMs: Double = 0
     private var audioBufferLogCount = 0
     private let speechActivityConfidenceThreshold = 0.50
+    private var dangerEvalExpectedLabel: String? {
+        let launchArgumentValue = UserDefaults.standard.string(forKey: "DangerEvalExpected")
+        let environmentValue = ProcessInfo.processInfo.environment["DANGER_EVAL_EXPECTED"]
+        let rawValue = launchArgumentValue ?? environmentValue
+        let normalized = rawValue?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalized?.isEmpty == false ? normalized : nil
+    }
 
     /// SoundAnalysis가 speech를 감지했을 때 호출어 STT 게이트를 열기 위한 이벤트입니다.
     let speechActivity = PassthroughSubject<Double, Never>()
@@ -187,6 +194,10 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
                         + "(conf=\(String(format: "%.3f", classification.confidence)), "
                         + "classifier_latency=\(String(format: "%.0f", latencyMs))ms)")
                     print("🎯 [SoundDetector] precise timestamp ms=\(Int64(classifiedAt.timeIntervalSince1970 * 1000))")
+                    self.logDangerEvaluation(
+                        predicted: sound.rawValue,
+                        confidence: classification.confidence
+                    )
                     self.sendDangerAlert(sound: sound, classifiedAt: classifiedAt)
                 }
                 return
@@ -202,6 +213,23 @@ class SoundDetector: NSObject, SNResultsObserving, ObservableObject {
     /// 소리 분석 요청 완료를 로그로 남깁니다.
     func requestDidComplete(_ request: SNRequest) {
         print("[SoundDetector] requestDidComplete")
+    }
+
+    /// 발표/실험용 위험음 정확도 평가 로그입니다.
+    /// Xcode Scheme launch argument `-DangerEvalExpected carHorn` 또는
+    /// environment `DANGER_EVAL_EXPECTED=carHorn`으로 expected label을 지정합니다.
+    private func logDangerEvaluation(predicted: String, confidence: Double) {
+        guard let expected = dangerEvalExpectedLabel else {
+            return
+        }
+
+        let result = expected == predicted ? "correct" : "wrong"
+        print(
+            "[DangerEval] expected=\(expected) "
+            + "predicted=\(predicted) "
+            + "conf=\(String(format: "%.2f", confidence)) "
+            + "result=\(result)"
+        )
     }
 
     /// SoundAnalysis 결과가 가리키는 실제 분석 window 시작 시각을 Date 기준으로 역산합니다.
