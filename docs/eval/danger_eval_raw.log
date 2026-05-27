@@ -1,0 +1,1523 @@
+-[WCSession onqueue_handleUpdateSessionState:]_block_invoke dropping as pairingIDs no longer match. pairingID (null), client pairingID: (null)
+WCSession is not paired
+📡 [DetectionVM] onAppear → BLE startScan() 강제 호출
+SoundDetector startDetection called
+[SoundDetector] analyzer request started
+[SoundDetector] audio engine started
+📡 [LissenceBLE] startScan deferred: state=Bluetooth 상태 확인 중, pendingScanRequest=true
+📡 [LissenceBLE] didUpdateState → Bluetooth 사용 가능
+📡 [LissenceBLE] BT 활성화 감지 → 대기 중이던 스캔 요청 실행
+📡 [LissenceBLE] startScan: service UUID 기반 스캔 시작
+🎯 [SoundDetector] timeline anchor set: sampleTime=11057364752, epochMs=1779372733903.1091
+[SoundDetector] audio buffer received count=1
+📡 [LissenceBLE] discovered characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 properties=[write,writeWithoutResponse,notify]
+📡 [LissenceBLE] setNotifyValue true for characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 properties=[write,writeWithoutResponse,notify]
+📡 [LissenceBLE] write characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 properties=[write,writeWithoutResponse,notify]
+📡 [LissenceBLE] notify characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 properties=[write,writeWithoutResponse,notify]
+📤 [LissenceBLE] write → ESP32 (WRITE_NR): {"type":"clock_ping","ts":1779372735295}
+📡 [LissenceBLE] notify state characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 isNotifying=true
+📥 [LissenceBLE] notify raw characteristic=BEB5483E-36E1-4688-B7F5-EA07361B26A8 text={"type":"clock_pong","phone_ts":1779372735295,"esp_ts":37984}
+📥 [LissenceBLE] clock_pong received raw={"type":"clock_pong","phone_ts":1779372735295,"esp_ts":37984}
+⏰ [LissenceBLE] clock sync success: phoneSent=1779372735295, phoneSource=payload, espTs=37984, rtt=242.6ms, offset=-1779372697.432s
+⏰ [LissenceBLE] precise timestamp enabled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(27%), mechanical_fan(15%), wind_rustling_leaves(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: insect(38%), bee_buzz(34%), fly_buzz(27%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: scissors(27%), wind(25%), writing(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), wind_noise_microphone(15%), water(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(87%), air_horn(76%), truck(55%)
+📳 [DangerHaptic] play carHorn
+📳 [DangerHaptic] engine started
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.878, classifier_latency=2903ms)
+🎯 [SoundDetector] precise timestamp ms=1779372739903
+⌚️ [WatchAlert] send danger=carHorn
+⚠️ Apple Watch가 페어링되어 있지 않아 전송하지 않습니다.
+📤 [LissenceBLE] write → ESP32 (WRITE_NR): {"type":"haptic","pattern":"carHorn","ts":42470,"win":975}
+📡 [BLEHaptic] write pattern=carHorn, ts=42470, win=975, mode=precise
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(55%), air_horn(22%), music(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(52%), car_horn(39%), keyboard_musical(36%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(11%), rail_transport(11%), bus(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), wind_noise_microphone(12%), water(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(16%), air_horn(12%), mechanical_fan(12%)
+[SoundDetector] audio buffer received count=100
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: air_horn(79%), car_horn(76%), truck(71%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.767, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372748903
+⌚️ [WatchAlert] send danger=carHorn
+📤 [LissenceBLE] write → ESP32 (WRITE_NR): {"type":"haptic","pattern":"carHorn","ts":51470,"win":975}
+📡 [BLEHaptic] write pattern=carHorn, ts=51470, win=975, mode=precise
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(64%), air_horn(58%), accordion(46%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.645, classifier_latency=2849ms)
+🎯 [SoundDetector] precise timestamp ms=1779372750403
+⌚️ [WatchAlert] send danger=carHorn
+📤 [LissenceBLE] write → ESP32 (WRITE_NR): {"type":"haptic","pattern":"carHorn","ts":52970,"win":975}
+📡 [BLEHaptic] write pattern=carHorn, ts=52970, win=975, mode=precise
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(64%), music(25%), harmonica(19%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.647, classifier_latency=2847ms)
+🎯 [SoundDetector] precise timestamp ms=1779372751903
+⌚️ [WatchAlert] send danger=carHorn
+📤 [LissenceBLE] write → ESP32 (WRITE_NR): {"type":"haptic","pattern":"carHorn","ts":54470,"win":975}
+📡 [BLEHaptic] write pattern=carHorn, ts=54470, win=975, mode=precise
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(8%), door(8%), drawer_open_close(8%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(28%), typewriter(22%), typing(22%)
+📡 [LissenceBLE] startScan: service UUID 기반 스캔 시작
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(46%), drawer_open_close(44%), door(42%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(56%), door_sliding(50%), drawer_open_close(31%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(88%), music(77%), air_horn(69%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.889, classifier_latency=2866ms)
+🎯 [SoundDetector] precise timestamp ms=1779372759403
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+📡 [LissenceBLE] fallback 스캔 시작 (deviceName=HearAlert)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(74%), air_horn(42%), music(33%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.744, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779372760903
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(86%), air_horn(33%), speech(28%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.862, classifier_latency=2855ms)
+🎯 [SoundDetector] precise timestamp ms=1779372762403
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(30%), door(30%), door_sliding(28%)
+[SoundDetector] audio buffer received count=200
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(53%), door_sliding(50%), mechanical_fan(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(20%), door_sliding(19%), mechanical_fan(8%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bee_buzz(30%), insect(28%), fly_buzz(25%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(93%), air_horn(78%), truck(50%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.933, classifier_latency=2855ms)
+🎯 [SoundDetector] precise timestamp ms=1779372769903
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(55%), air_horn(38%), truck(28%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(31%), car_horn(13%), rail_transport(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(37%), door(32%), drawer_open_close(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(61%), clock(30%), tick_tock(25%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(25%), tick(13%), tick_tock(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: beep(65%), truck(42%), car_horn(40%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(63%), door(22%), door_sliding(21%)
+[SpeechGate] speech detected confidence=0.63
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779372783.270
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779372783.669 reason=speechGate deltaFromRequestMs=399
+[SoundDetector] audio buffer received count=300
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(50%), drawer_open_close(35%), water(13%)
+[SpeechGate] speech detected confidence=0.50
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(70%), speech(70%), door_sliding(22%)
+[SpeechGate] speech detected confidence=0.70
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(73%), truck(47%), air_horn(42%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.739, classifier_latency=2850ms)
+🎯 [SoundDetector] precise timestamp ms=1779372784903
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(79%), air_horn(49%), truck(29%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.793, classifier_latency=2845ms)
+🎯 [SoundDetector] precise timestamp ms=1779372786403
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(17%), wind_noise_microphone(14%), fly_buzz(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(17%), music(17%), wind_noise_microphone(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(33%), wind(31%), wind_noise_microphone(26%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(73%), door_sliding(30%), door(26%)
+[SpeechGate] speech detected confidence=0.74
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779372795.248
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779372795.668 reason=speechGate deltaFromRequestMs=420
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: harmonica(94%), music(75%), wind_instrument(53%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(56%), harmonica(46%), car_horn(41%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(64%), wind_instrument(36%), rail_transport(30%)
+[SoundDetector] audio buffer received count=400
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(94%), rail_transport(72%), train(66%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.942, classifier_latency=2851ms)
+🎯 [SoundDetector] precise timestamp ms=1779372798403
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(65%), air_horn(27%), truck(22%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.654, classifier_latency=2847ms)
+🎯 [SoundDetector] precise timestamp ms=1779372799903
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(51%), music(21%), air_horn(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(14%), music(13%), train(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(31%), railroad_car(22%), train(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(57%), railroad_car(48%), train(46%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(37%), car_horn(37%), door(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(90%), air_horn(89%), truck(74%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.910, classifier_latency=2866ms)
+🎯 [SoundDetector] precise timestamp ms=1779372808903
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: car_horn(76%), air_horn(33%), truck(25%)
+📳 [DangerHaptic] play carHorn
+🚨 [SoundDetector] DANGER detected: 🚘 차 경적 감지! (conf=0.769, classifier_latency=2858ms)
+🎯 [SoundDetector] precise timestamp ms=1779372810403
+⌚️ [WatchAlert] send danger=carHorn
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(35%), drawer_open_close(16%), tick(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(36%), typewriter(34%), typing(27%)
+[SoundDetector] audio buffer received count=500
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(53%), door(53%), door_sliding(47%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(21%), train(17%), railroad_car(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: laughter(27%), person_walking(17%), sneeze(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: sneeze(32%), slap_smack(23%), laughter(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: typing(78%), typing_computer_keyboard(76%), typewriter(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(21%), typing(20%), water(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(11%), wind(10%), water(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(20%), rail_transport(10%), wind(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(22%), railroad_car(19%), train(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(20%), traffic_noise(19%), bus(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: typing(47%), speech(32%), typing_computer_keyboard(31%)
+[SoundDetector] audio buffer received count=600
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: typing(61%), speech(46%), typing_computer_keyboard(32%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(20%), laughter(9%), music(8%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(44%), mechanical_fan(35%), door_sliding(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(91%), police_siren(82%), siren(50%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.916, classifier_latency=2864ms)
+🎯 [SoundDetector] precise timestamp ms=1779372835903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(78%), police_siren(71%), ambulance_siren(43%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.780, classifier_latency=2859ms)
+🎯 [SoundDetector] precise timestamp ms=1779372837403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(84%), police_siren(65%), ambulance_siren(44%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.850, classifier_latency=2854ms)
+🎯 [SoundDetector] precise timestamp ms=1779372838903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(74%), police_siren(48%), ambulance_siren(27%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.748, classifier_latency=2849ms)
+🎯 [SoundDetector] precise timestamp ms=1779372840403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(38%), finger_snapping(26%), traffic_noise(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(41%), keyboard_musical(22%), guitar(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fly_buzz(12%), insect(12%), bee_buzz(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(15%), wind_noise_microphone(14%), ocean(13%)
+[SoundDetector] audio buffer received count=700
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(94%), police_siren(83%), siren(59%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.947, classifier_latency=2848ms)
+🎯 [SoundDetector] precise timestamp ms=1779372847903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(84%), police_siren(57%), ambulance_siren(41%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.841, classifier_latency=2865ms)
+🎯 [SoundDetector] precise timestamp ms=1779372849403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(81%), police_siren(54%), ambulance_siren(43%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.819, classifier_latency=2860ms)
+🎯 [SoundDetector] precise timestamp ms=1779372850903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(86%), police_siren(70%), ambulance_siren(41%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.862, classifier_latency=2854ms)
+🎯 [SoundDetector] precise timestamp ms=1779372852403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(65%), police_siren(40%), music(38%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.658, classifier_latency=2850ms)
+🎯 [SoundDetector] precise timestamp ms=1779372853903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(48%), brass_instrument(23%), railroad_car(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(27%), wind(14%), water(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(16%), wind(15%), wind_noise_microphone(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(24%), train(20%), wind(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(97%), police_siren(87%), siren(66%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.978, classifier_latency=2849ms)
+🎯 [SoundDetector] precise timestamp ms=1779372861403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(88%), ambulance_siren(60%), police_siren(59%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.883, classifier_latency=2843ms)
+🎯 [SoundDetector] precise timestamp ms=1779372862903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=800
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(84%), police_siren(60%), ambulance_siren(46%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.840, classifier_latency=2860ms)
+🎯 [SoundDetector] precise timestamp ms=1779372864403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(89%), police_siren(67%), ambulance_siren(62%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.890, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372865903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(94%), police_siren(83%), ambulance_siren(64%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.945, classifier_latency=2849ms)
+🎯 [SoundDetector] precise timestamp ms=1779372867403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(54%), plucked_string_instrument(27%), guitar(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(39%), keyboard_musical(15%), piano(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(29%), railroad_car(25%), subway_metro(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(14%), wind_noise_microphone(12%), air_conditioner(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(98%), police_siren(96%), ambulance_siren(88%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.989, classifier_latency=2848ms)
+🎯 [SoundDetector] precise timestamp ms=1779372874903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(90%), ambulance_siren(75%), police_siren(67%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.908, classifier_latency=2845ms)
+🎯 [SoundDetector] precise timestamp ms=1779372876403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(85%), ambulance_siren(59%), police_siren(53%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.851, classifier_latency=2861ms)
+🎯 [SoundDetector] precise timestamp ms=1779372877903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(92%), police_siren(79%), ambulance_siren(58%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.926, classifier_latency=2857ms)
+🎯 [SoundDetector] precise timestamp ms=1779372879403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=900
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(42%), plucked_string_instrument(30%), guitar(27%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(29%), music(24%), air_conditioner(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(35%), wind(22%), mechanical_fan(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(62%), wind(18%), glass_clink(14%)
+[SpeechGate] speech detected confidence=0.63
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779372888.260
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779372888.701 reason=speechGate deltaFromRequestMs=440
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(64%), traffic_noise(24%), wind(18%)
+[SpeechGate] speech detected confidence=0.64
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(96%), ambulance_siren(78%), police_siren(78%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.961, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372888403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(90%), ambulance_siren(75%), police_siren(56%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.903, classifier_latency=2850ms)
+🎯 [SoundDetector] precise timestamp ms=1779372889903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(91%), ambulance_siren(78%), police_siren(60%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.920, classifier_latency=2846ms)
+🎯 [SoundDetector] precise timestamp ms=1779372891403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(93%), police_siren(81%), ambulance_siren(79%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.934, classifier_latency=2863ms)
+🎯 [SoundDetector] precise timestamp ms=1779372892903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(47%), guitar(44%), music(44%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(34%), rail_transport(34%), railroad_car(28%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(23%), rail_transport(17%), train(13%)
+[SoundDetector] audio buffer received count=1000
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(63%), train(56%), railroad_car(54%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(99%), police_siren(96%), ambulance_siren(89%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.993, classifier_latency=2860ms)
+🎯 [SoundDetector] precise timestamp ms=1779372900403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(86%), ambulance_siren(62%), fire_engine_siren(52%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.863, classifier_latency=2855ms)
+🎯 [SoundDetector] precise timestamp ms=1779372901903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(75%), police_siren(40%), ambulance_siren(38%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.758, classifier_latency=2854ms)
+🎯 [SoundDetector] precise timestamp ms=1779372903403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(81%), police_siren(58%), plucked_string_instrument(38%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.815, classifier_latency=2847ms)
+🎯 [SoundDetector] precise timestamp ms=1779372904903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(55%), plucked_string_instrument(44%), guitar(44%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(25%), rail_transport(21%), railroad_car(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(23%), railroad_car(20%), train(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), wind_noise_microphone(14%), traffic_noise(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(99%), police_siren(98%), ambulance_siren(88%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.996, classifier_latency=2845ms)
+🎯 [SoundDetector] precise timestamp ms=1779372912403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(91%), ambulance_siren(69%), police_siren(64%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.919, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779372913903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=1100
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(92%), police_siren(85%), ambulance_siren(78%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.929, classifier_latency=2859ms)
+🎯 [SoundDetector] precise timestamp ms=1779372915403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(49%), guitar(39%), plucked_string_instrument(36%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(45%), railroad_car(38%), train(38%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(39%), railroad_car(32%), train(31%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(29%), door(28%), train(25%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(86%), air_horn(72%), train(66%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.869, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372922903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(77%), air_horn(70%), truck(59%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.770, classifier_latency=2848ms)
+🎯 [SoundDetector] precise timestamp ms=1779372924403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(88%), ambulance_siren(60%), police_siren(60%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.884, classifier_latency=2845ms)
+🎯 [SoundDetector] precise timestamp ms=1779372925903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(92%), police_siren(61%), ambulance_siren(58%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.927, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779372927403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(42%), rail_transport(37%), guitar(33%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(23%), bus(20%), traffic_noise(18%)
+[SoundDetector] audio buffer received count=1200
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(26%), train(21%), railroad_car(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(21%), rail_transport(20%), railroad_car(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(97%), police_siren(86%), ambulance_siren(73%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.972, classifier_latency=2860ms)
+🎯 [SoundDetector] precise timestamp ms=1779372934903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(90%), ambulance_siren(74%), police_siren(60%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.909, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372936403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(80%), ambulance_siren(50%), police_siren(47%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.805, classifier_latency=2852ms)
+🎯 [SoundDetector] precise timestamp ms=1779372937903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(94%), police_siren(82%), ambulance_siren(66%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.943, classifier_latency=2847ms)
+🎯 [SoundDetector] precise timestamp ms=1779372939403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(48%), plucked_string_instrument(47%), guitar(45%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(31%), rail_transport(24%), railroad_car(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(16%), insect(13%), fly_buzz(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: playing_table_tennis(21%), hammer(16%), wind(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: cough(67%), horse_neigh(43%), emergency_vehicle(39%)
+[SoundDetector] audio buffer received count=1300
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(94%), police_siren(83%), ambulance_siren(75%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.945, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779372948403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(85%), ambulance_siren(63%), fire_engine_siren(42%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.854, classifier_latency=2859ms)
+🎯 [SoundDetector] precise timestamp ms=1779372949903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(85%), police_siren(61%), ambulance_siren(60%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.851, classifier_latency=2851ms)
+🎯 [SoundDetector] precise timestamp ms=1779372951403
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: emergency_vehicle(77%), police_siren(40%), ambulance_siren(29%)
+📳 [DangerHaptic] play siren
+🚨 [SoundDetector] DANGER detected: 🚨 경찰/소방차 사이렌 감지! (conf=0.777, classifier_latency=2848ms)
+🎯 [SoundDetector] precise timestamp ms=1779372952903
+⌚️ [WatchAlert] send danger=siren
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(34%), speech(32%), drawer_open_close(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: person_walking(29%), drawer_open_close(26%), person_shuffling(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(54%), mechanical_fan(38%), door_sliding(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(33%), door_sliding(25%), door(25%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(31%), traffic_noise(19%), rail_transport(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: air_conditioner(26%), rail_transport(22%), bus(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(32%), railroad_car(27%), train(22%)
+[SoundDetector] audio buffer received count=1400
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(98%), whistling(42%), beep(12%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.990, classifier_latency=2852ms)
+🎯 [SoundDetector] precise timestamp ms=1779372964903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fireworks(41%), whistling(31%), music(27%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bird(84%), bird_vocalization(84%), bird_chirp_tweet(74%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(25%), subway_metro(22%), bus(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: slurp(28%), rail_transport(22%), chewing(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(22%), wind_noise_microphone(19%), water(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: telephone(78%), music(67%), ringtone(59%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bird(39%), bird_vocalization(24%), bird_squawk(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(41%), railroad_car(36%), train(33%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(80%), fireworks(51%), firecracker(40%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.800, classifier_latency=2852ms)
+🎯 [SoundDetector] precise timestamp ms=1779372978403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: whistling(30%), music(28%), guitar(20%)
+[SoundDetector] audio buffer received count=1500
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(38%), synthesizer(25%), keyboard_musical(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bird(24%), wind(14%), rail_transport(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(54%), railroad_car(50%), train(49%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(17%), wind_noise_microphone(17%), wind(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(98%), whistling(34%), beep(12%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.986, classifier_latency=2846ms)
+🎯 [SoundDetector] precise timestamp ms=1779372987403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(69%), fireworks(38%), firecracker(33%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.691, classifier_latency=2841ms)
+🎯 [SoundDetector] precise timestamp ms=1779372988903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(44%), whistling(24%), telephone(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(30%), train(25%), railroad_car(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(33%), door_sliding(29%), drawer_open_close(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: tick_tock(19%), tick(16%), door(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(79%), beep(40%), microwave_oven(33%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.800, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779372996403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=1600
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(63%), whistling(59%), fireworks(25%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.637, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779372997903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(57%), guitar(44%), plucked_string_instrument(40%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(49%), keyboard_musical(30%), telephone(28%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(18%), mechanical_fan(16%), train(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(29%), railroad_car(25%), train(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: whistling(64%), smoke_detector(62%), door_sliding(22%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.626, classifier_latency=2856ms)
+🎯 [SoundDetector] precise timestamp ms=1779373005403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(74%), fireworks(54%), firecracker(36%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.748, classifier_latency=2849ms)
+🎯 [SoundDetector] precise timestamp ms=1779373006903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(33%), music(27%), guitar(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: telephone(24%), ringtone(15%), music(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(29%), wind(23%), ocean(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fireworks(81%), smoke_detector(76%), firecracker(66%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.765, classifier_latency=2852ms)
+🎯 [SoundDetector] precise timestamp ms=1779373012903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=1700
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: whistling(40%), fireworks(22%), music(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(42%), whistling(37%), bird(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bird(28%), bird_vocalization(11%), laughter(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(25%), door(22%), train(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(77%), train(71%), railroad_car(68%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(48%), railroad_car(40%), train(39%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(95%), whistling(39%), fireworks(15%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.958, classifier_latency=2842ms)
+🎯 [SoundDetector] precise timestamp ms=1779373023403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(83%), whistling(73%), fireworks(34%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.839, classifier_latency=2859ms)
+🎯 [SoundDetector] precise timestamp ms=1779373024903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(59%), whistling(59%), plucked_string_instrument(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(79%), telephone(62%), disc_scratching(59%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(76%), breathing(26%), music(25%)
+[SpeechGate] speech detected confidence=0.76
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373032.247
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373032.628 reason=speechGate deltaFromRequestMs=381
+[STT] first partial received timestamp=1779373033.604 reason=speechGate deltaFromAudioStartMs=976 text=네
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=네, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SoundDetector] audio buffer received count=1800
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(67%), speech(52%), whistling(43%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.674, classifier_latency=2850ms)
+🎯 [SoundDetector] precise timestamp ms=1779373030903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SpeechGate] speech detected confidence=0.52
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(38%), music(26%), smoke_detector(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(33%), bird(21%), telephone(18%)
+[SpeechGate] stop STT after timeout
+[STT] first partial received timestamp=1779373037.791 reason=speechGate deltaFromAudioStartMs=-1 text=네
+[SpeechManager] recognitionTask error: Recognition request was canceled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(37%), railroad_car(31%), train(30%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(58%), railroad_car(54%), train(50%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(70%), whistling(43%), elk_bugle(27%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.707, classifier_latency=2848ms)
+🎯 [SoundDetector] precise timestamp ms=1779373038403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(77%), whistling(33%), fireworks(24%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.777, classifier_latency=2841ms)
+🎯 [SoundDetector] precise timestamp ms=1779373039903
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: smoke_detector(66%), music(48%), whistling(37%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.661, classifier_latency=2862ms)
+🎯 [SoundDetector] precise timestamp ms=1779373041403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(51%), telephone(41%), wind(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(43%), train(41%), railroad_car(38%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(47%), traffic_noise(11%), rail_transport(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: whistling(83%), smoke_detector(73%), fireworks(68%)
+📳 [DangerHaptic] play fireAlarm
+📳 [DangerHaptic] fireAlarm pattern: long buzz + strong final double tap
+🚨 [SoundDetector] DANGER detected: 🔥 화재 경보기 소리 감지! (conf=0.734, classifier_latency=2842ms)
+🎯 [SoundDetector] precise timestamp ms=1779373047403
+⌚️ [WatchAlert] send danger=fireAlarm
+📡 [BLEHaptic] skip: peripheral not connected
+[SoundDetector] audio buffer received count=1900
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: plucked_string_instrument(30%), whistling(29%), music(28%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(42%), guitar(33%), plucked_string_instrument(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(49%), laughter(23%), bus(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(55%), rail_transport(39%), train(33%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(38%), train(31%), railroad_car(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(11%), rail_transport(9%), train(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(67%), door(14%), door_sliding(12%)
+[SpeechGate] speech detected confidence=0.68
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373060.752
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373061.152 reason=speechGate deltaFromRequestMs=400
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(77%), fire(11%), fire_crackle(11%)
+[SpeechGate] speech detected confidence=0.78
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(80%), door(11%), laughter(10%)
+[SpeechGate] speech detected confidence=0.81
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(50%), sigh(42%), laughter(30%)
+[SpeechGate] speech detected confidence=0.51
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: laughter(29%), speech(25%), sneeze(20%)
+[SoundDetector] audio buffer received count=2000
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(54%), water(19%), finger_snapping(14%)
+[SpeechGate] speech detected confidence=0.55
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(28%), water(26%), railroad_car(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(26%), rail_transport(16%), railroad_car(14%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(40%), typing(32%), typing_computer_keyboard(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(62%), typing(57%), typewriter(44%)
+[SpeechGate] speech detected confidence=0.63
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373074.261
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373074.676 reason=speechGate deltaFromRequestMs=414
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: typing(42%), typewriter(32%), typing_computer_keyboard(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(52%), crumpling_crinkling(16%), rain(16%)
+[SpeechGate] speech detected confidence=0.53
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(72%), fire_crackle(35%), fire(32%)
+[SpeechGate] speech detected confidence=0.73
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(49%), fire_crackle(38%), fire(37%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fire_crackle(28%), fire(26%), rain(16%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fire_crackle(12%), basketball_bounce(12%), typing(12%)
+[SoundDetector] audio buffer received count=2100
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(37%), typing(33%), typewriter(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(65%), typewriter(21%), typing(19%)
+[SpeechGate] speech detected confidence=0.66
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373086.245
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373086.624 reason=speechGate deltaFromRequestMs=379
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(31%), rail_transport(19%), railroad_car(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: typing(30%), typewriter(16%), typing_computer_keyboard(12%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(23%), typing(20%), speech(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(53%), water(13%), rail_transport(12%)
+[SpeechGate] speech detected confidence=0.54
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373092.254
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373092.681 reason=speechGate deltaFromRequestMs=427
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(67%), typewriter(13%), liquid_spraying(12%)
+[SpeechGate] speech detected confidence=0.67
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(18%), water(13%), fire(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(31%), speech(17%), rain(15%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(57%), door_sliding(37%), door(33%)
+[SpeechGate] speech detected confidence=0.58
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373098.264
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373098.644 reason=speechGate deltaFromRequestMs=381
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(76%), typewriter(19%), cutlery_silverware(19%)
+[SpeechGate] speech detected confidence=0.76
+[SpeechGate] extend STT window
+[SoundDetector] audio buffer received count=2200
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(48%), door(11%), bus(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(43%), chicken(18%), bus(16%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: fowl(50%), chicken(46%), water(41%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(27%), bathtub_filling_washing(21%), rail_transport(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(13%), mechanical_fan(13%), wind(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(17%), rail_transport(16%), air_conditioner(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(19%), wind_noise_microphone(17%), bus(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(20%), railroad_car(18%), bus(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(16%), rail_transport(15%), subway_metro(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(23%), speech(20%), air_conditioner(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(62%), water(25%), ocean(16%)
+[SpeechGate] speech detected confidence=0.62
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373116.258
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373116.670 reason=speechGate deltaFromRequestMs=412
+[SoundDetector] audio buffer received count=2300
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(57%), water(33%), wind(26%)
+[SpeechGate] speech detected confidence=0.57
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(83%), music(14%), water(14%)
+[SpeechGate] speech detected confidence=0.84
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(55%), train(51%), speech(51%)
+[SpeechGate] speech detected confidence=0.52
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(48%), rail_transport(33%), train(26%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: laughter(70%), speech(63%), chuckle_chortle(61%)
+[SpeechGate] speech detected confidence=0.63
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(51%), laughter(39%), chuckle_chortle(27%)
+[SpeechGate] speech detected confidence=0.52
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(68%), drawer_open_close(33%), door(18%)
+[SpeechGate] speech detected confidence=0.68
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(76%), air_conditioner(14%), music(12%)
+[SpeechGate] speech detected confidence=0.77
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(64%), drawer_open_close(35%), rail_transport(32%)
+[SpeechGate] speech detected confidence=0.64
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(39%), railroad_car(33%), train(30%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(24%), rail_transport(13%), air_conditioner(12%)
+[SoundDetector] audio buffer received count=2400
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(72%), water(7%), rail_transport(7%)
+[SpeechGate] speech detected confidence=0.73
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373134.245
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373134.729 reason=speechGate deltaFromRequestMs=483
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(31%), rail_transport(26%), train(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(80%), laughter(25%), chuckle_chortle(20%)
+[SpeechGate] speech detected confidence=0.80
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(84%), breathing(15%), music(13%)
+[SpeechGate] speech detected confidence=0.84
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(70%), rail_transport(9%), water(8%)
+[SpeechGate] speech detected confidence=0.71
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(21%), door_sliding(19%), door(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(41%), rail_transport(24%), train(22%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(38%), rail_transport(21%), laughter(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(32%), dog(15%), laughter(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(32%), water(13%), wind(7%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(33%), door(30%), drawer_open_close(18%)
+[SoundDetector] audio buffer received count=2500
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(34%), door(27%), door_sliding(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(44%), dishes_pots_pans(22%), drawer_open_close(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(28%), railroad_car(24%), train(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(49%), rail_transport(37%), train(32%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(43%), rail_transport(21%), railroad_car(19%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(26%), railroad_car(24%), train(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(18%), railroad_car(14%), train(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(57%), rail_transport(31%), railroad_car(27%)
+[SpeechGate] speech detected confidence=0.57
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373161.245
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373161.625 reason=speechGate deltaFromRequestMs=380
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(78%), rail_transport(13%), railroad_car(12%)
+[SpeechGate] speech detected confidence=0.78
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(17%), door(13%), dog(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(11%), crushing(10%), air_conditioner(10%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] audio buffer received count=2600
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(56%), water(21%), music(15%)
+[SpeechGate] speech detected confidence=0.56
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373167.258
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373167.662 reason=speechGate deltaFromRequestMs=404
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(70%), music(11%), drawer_open_close(11%)
+[SpeechGate] speech detected confidence=0.70
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(66%), fire(22%), water(21%)
+[SpeechGate] speech detected confidence=0.66
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(21%), rail_transport(13%), water(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(38%), railroad_car(31%), train(31%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), wind_noise_microphone(14%), water(8%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(28%), train(22%), railroad_car(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(60%), railroad_car(55%), train(52%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(21%), mechanical_fan(21%), air_conditioner(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(22%), speech(20%), hammer(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: railroad_car(60%), rail_transport(59%), train(53%)
+[SoundDetector] audio buffer received count=2700
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(66%), railroad_car(55%), train(55%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bus(29%), rail_transport(28%), railroad_car(25%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(27%), railroad_car(23%), wind(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(55%), railroad_car(54%), train(52%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: breathing(44%), snoring(40%), cutlery_silverware(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: breathing(38%), speech(18%), gasp(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(63%), breathing(18%), wind(12%)
+[SpeechGate] speech detected confidence=0.64
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373192.746
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373193.212 reason=speechGate deltaFromRequestMs=466
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(65%), door(40%), door_sliding(28%)
+[SpeechGate] speech detected confidence=0.65
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(72%), door_sliding(57%), door(47%)
+[SpeechGate] speech detected confidence=0.72
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: writing(82%), speech(76%), saw(18%)
+[SpeechGate] speech detected confidence=0.77
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(49%), door_sliding(40%), tap(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(34%), door(32%), drawer_open_close(27%)
+[SoundDetector] audio buffer received count=2800
+[SpeechGate] stop STT after timeout
+[STT] first partial received timestamp=1779373201.281 reason=speechGate deltaFromAudioStartMs=-1 text=오
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=오, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SpeechManager] recognitionTask error: Recognition request was canceled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: person_shuffling(16%), dog(15%), drawer_open_close(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door_sliding(71%), door(55%), drawer_open_close(53%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(57%), drawer_open_close(33%), door(13%)
+[SpeechGate] speech detected confidence=0.57
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373204.731
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373205.128 reason=speechGate deltaFromRequestMs=397
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(81%), drawer_open_close(28%), door(12%)
+[SpeechGate] speech detected confidence=0.81
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(78%), person_walking(25%), door(17%)
+[SpeechGate] speech detected confidence=0.79
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: person_walking(73%), speech(58%), music(39%)
+[SpeechGate] speech detected confidence=0.59
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(34%), person_walking(26%), door_sliding(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(46%), train(41%), railroad_car(40%)
+[SpeechGate] stop STT after timeout
+[STT] first partial received timestamp=1779373213.286 reason=speechGate deltaFromAudioStartMs=-1 text=됐어
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=됐어, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SpeechManager] recognitionTask error: Recognition request was canceled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(67%), rail_transport(15%), subway_metro(12%)
+[SpeechGate] speech detected confidence=0.67
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373213.755
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373214.223 reason=speechGate deltaFromRequestMs=468
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(61%), wind(17%), wind_noise_microphone(14%)
+[SpeechGate] speech detected confidence=0.61
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(33%), railroad_car(26%), music(25%)
+[SoundDetector] audio buffer received count=2900
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(35%), wind_instrument(24%), wind(10%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(27%), rail_transport(24%), subway_metro(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(55%), rail_transport(47%), railroad_car(37%)
+[SpeechGate] speech detected confidence=0.55
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373221.257
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373221.682 reason=speechGate deltaFromRequestMs=425
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(37%), railroad_car(33%), train(30%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: aircraft(32%), music(32%), wind(17%)
+[SpeechGate] stop STT after timeout
+[SpeechManager] recognitionTask error: No speech detected
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: music(25%), rail_transport(14%), railroad_car(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(65%), railroad_car(63%), train(59%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(58%), wind_noise_microphone(27%), wind(26%)
+[SpeechGate] speech detected confidence=0.58
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373228.760
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373229.184 reason=speechGate deltaFromRequestMs=424
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(58%), drawer_open_close(14%), rail_transport(14%)
+[SpeechGate] speech detected confidence=0.59
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(70%), drawer_open_close(17%), air_conditioner(16%)
+[SpeechGate] speech detected confidence=0.70
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(73%), air_conditioner(33%), music(21%)
+[SpeechGate] speech detected confidence=0.73
+[SpeechGate] extend STT window
+[SoundDetector] audio buffer received count=3000
+[STT] first partial received timestamp=1779373233.734 reason=speechGate deltaFromAudioStartMs=4550 text=10,000,000,000,000,000
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=10,000,000,000,000,000, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[AttentionCall] transcript restarted -> baseline updated, skip full transcript
+[AttentionCall] segment=영상링크
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=영상링크, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(58%), fly_buzz(48%), bee_buzz(47%)
+[SpeechGate] speech detected confidence=0.59
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(72%), music(15%), wind(14%)
+[SpeechGate] speech detected confidence=0.73
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(18%), wind_noise_microphone(17%), rail_transport(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(44%), boat_water_vehicle(29%), wind(17%)
+[SpeechGate] stop STT after timeout
+[STT] first partial received timestamp=1779373240.303 reason=speechGate deltaFromAudioStartMs=-1 text=영상 링크
+[SpeechManager] recognitionTask error: Recognition request was canceled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(26%), water(22%), railroad_car(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(35%), railroad_car(31%), train(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(20%), railroad_car(19%), wind(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(30%), wind(30%), wind_noise_microphone(29%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(38%), traffic_noise(24%), aircraft(24%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: insect(24%), traffic_noise(23%), fly_buzz(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(16%), mechanical_fan(15%), subway_metro(14%)
+[SoundDetector] audio buffer received count=3100
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: insect(43%), fly_buzz(37%), bee_buzz(37%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: aircraft(18%), wind(16%), wind_noise_microphone(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: burp(29%), bus(27%), air_conditioner(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: burp(84%), pig_oink(49%), dishes_pots_pans(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: beep(40%), telephone_bell_ringing(33%), telephone(30%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: telephone(36%), cough(35%), alarm_clock(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: cough(71%), speech(44%), burp(21%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(39%), sneeze(23%), writing(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(54%), breathing(19%), writing(17%)
+[SpeechGate] speech detected confidence=0.54
+[SpeechGate] start STT for attention call
+[SpeechManager] startRecording requested reason=speechGate
+[STT] startRecording called reason=speechGate timestamp=1779373263.256
+[SpeechManager] configure audio session for recording
+[SpeechManager] audio engine started
+[STT] audio engine actually started timestamp=1779373263.627 reason=speechGate deltaFromRequestMs=371
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(85%), breathing(75%), gasp(74%)
+[SpeechGate] speech detected confidence=0.85
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(52%), laughter(45%), chuckle_chortle(34%)
+[SpeechGate] speech detected confidence=0.52
+[SpeechGate] extend STT window
+[SoundDetector] audio buffer received count=3200
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(66%), laughter(66%), chuckle_chortle(44%)
+[SpeechGate] speech detected confidence=0.67
+[SpeechGate] extend STT window
+[STT] first partial received timestamp=1779373269.064 reason=speechGate deltaFromAudioStartMs=5437 text=습
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=습, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(36%), breathing(27%), laughter(23%)
+[AttentionCall] segment=습니다
+[AttentionCall] repeatWindow=5.0s, countedCandidates=0
+[AttentionCall] transcript=습니다, candidate=false, recentCandidate=false, occurrenceCount=0, repeatCount=0, emergency=false, score=0, alertLevel=none
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(72%), music(16%), rail_transport(13%)
+[SpeechGate] speech detected confidence=0.72
+[SpeechGate] extend STT window
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(41%), rail_transport(12%), music(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: speech(17%), wind(12%), water(11%)
+[SpeechGate] stop STT after timeout
+[STT] first partial received timestamp=1779373274.797 reason=speechGate deltaFromAudioStartMs=-1 text=습니다
+[SpeechManager] recognitionTask error: Recognition request was canceled
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(24%), wind_noise_microphone(24%), bus(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(26%), wind_noise_microphone(24%), ocean(14%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: power_windows(44%), door(29%), door_sliding(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: air_conditioner(17%), mechanical_fan(14%), bus(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind_noise_microphone(19%), wind(18%), bus(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(21%), railroad_car(19%), train(17%)
+[SoundDetector] audio buffer received count=3300
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: foghorn(56%), humming(32%), insect(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: foghorn(14%), wind(6%), insect(6%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), mechanical_fan(13%), bus(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(38%), door(19%), subway_metro(18%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(25%), railroad_car(19%), train(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(35%), mechanical_fan(20%), door_sliding(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: door(16%), rail_transport(13%), train(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(26%), railroad_car(23%), train(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(17%), train(12%), railroad_car(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: chewing(24%), fire(7%), fire_crackle(7%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: bird(32%), bird_vocalization(24%), bird_squawk(16%)
+[SoundDetector] audio buffer received count=3400
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(15%), wind(12%), bird(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(15%), wind(15%), railroad_car(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(32%), railroad_car(31%), train(28%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(16%), wind_noise_microphone(15%), rail_transport(13%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(22%), train(17%), railroad_car(15%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: nose_blowing(30%), mechanical_fan(22%), wind(20%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: breathing(15%), music(10%), rail_transport(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: click(53%), rail_transport(29%), train(23%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(34%), railroad_car(29%), train(27%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(16%), wind(11%), door(10%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: mechanical_fan(21%), wind(12%), air_conditioner(11%)
+[SoundDetector] audio buffer received count=3500
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(17%), wind_noise_microphone(16%), air_conditioner(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(26%), mechanical_fan(25%), railroad_car(22%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(50%), train(41%), railroad_car(36%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(25%), rail_transport(15%), railroad_car(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(18%), mechanical_fan(12%), wind(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(13%), mechanical_fan(10%), water(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(20%), railroad_car(17%), train(16%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: water(13%), wind(12%), mechanical_fan(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(23%), water(20%), wind_noise_microphone(17%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind_noise_microphone(13%), wind(13%), fly_buzz(12%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: rail_transport(25%), railroad_car(19%), train(19%)
+[SoundDetector] audio buffer received count=3600
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(12%), wind_noise_microphone(12%), bus(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: drawer_open_close(21%), zipper(13%), tearing(9%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: writing(44%), tearing(11%), dog(11%)
+[SoundDetector] analyzer callback alive
+🎧 [SoundDetector] top3: wind(15%), mechanical_fan(13%), insect(11%)
+SoundDetector stopDetection called
+📳 [DangerHaptic] engine stopped reason=5
